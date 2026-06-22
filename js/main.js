@@ -750,18 +750,10 @@ document.querySelectorAll('.read-btn').forEach(function(btn) {
 articleModalClose.addEventListener('click', closeArticleModal);
 articleModal.querySelector('.modal-backdrop').addEventListener('click', closeArticleModal);
 
-// ==================== 6. 留言板（Firebase Firestore） ====================
-// 初始化 Firebase
-firebase.initializeApp({
-    apiKey: "AIzaSyB_k_tNTjOQc2Ek8BeICcCvPiMF-JXh2NQ",
-    authDomain: "dtj-portfolio.firebaseapp.com",
-    projectId: "dtj-portfolio",
-    storageBucket: "dtj-portfolio.firebasestorage.app",
-    messagingSenderId: "457196498952",
-    appId: "1:457196498952:web:30524d1123e7cb8009e1bd"
-});
-var db = firebase.firestore();
-var messagesRef = db.collection('guestbook');
+// ==================== 6. 留言板（Firebase REST API） ====================
+// 直接用 REST API，不依赖 Firebase SDK
+var GB_API_KEY = 'AIzaSyB_k_tNTjOQc2Ek8BeICcCvPiMF-JXh2NQ';
+var GB_BASE = 'https://firestore.googleapis.com/v1/projects/dtj-portfolio/databases/(default)/documents/guestbook';
 
 var gbName = document.getElementById('gbName');
 var gbMessage = document.getElementById('gbMessage');
@@ -771,42 +763,51 @@ var gbEmpty = document.getElementById('gbEmpty');
 var gbLoading = document.getElementById('gbLoading');
 var gbCharCount = document.getElementById('gbCharCount');
 
-/** 从 Firestore 加载留言（最新 50 条） */
+/** 从 Firestore 加载留言 */
 function loadMessages() {
     if (!gbLoading) return;
     gbLoading.style.display = 'block';
     gbList.innerHTML = '';
     gbEmpty.style.display = 'none';
 
-    messagesRef
-        .orderBy('time', 'desc')
-        .limit(50)
-        .get()
-        .then(function(snapshot) {
+    fetch(GB_BASE + '?key=' + GB_API_KEY)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
             gbLoading.style.display = 'none';
-            if (snapshot.empty) {
+            var docs = data.documents || [];
+            if (docs.length === 0) {
                 gbEmpty.style.display = 'block';
                 return;
             }
             gbEmpty.style.display = 'none';
-            snapshot.forEach(function(doc) {
-                var msg = doc.data();
-                var item = document.createElement('div');
-                item.className = 'gb-item';
 
-                var d = msg.time ? msg.time.toDate() : new Date();
+            // 按时间倒序排列
+            docs.sort(function(a, b) {
+                var ta = a.fields.time ? a.fields.time.timestampValue : a.createTime;
+                var tb = b.fields.time ? b.fields.time.timestampValue : b.createTime;
+                return tb.localeCompare(ta);
+            });
+
+            docs.forEach(function(doc) {
+                var f = doc.fields;
+                var name = (f.name && f.name.stringValue) || '匿名';
+                var text = (f.text && f.text.stringValue) || '';
+                var timeVal = (f.time && f.time.timestampValue) || doc.createTime;
+
+                var d = new Date(timeVal);
                 var timeStr = d.toLocaleString(
                     currentLang === 'zh' ? 'zh-CN' : 'en-US',
                     { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
                 );
 
+                var item = document.createElement('div');
+                item.className = 'gb-item';
                 item.innerHTML =
                     '<div class="gb-item-header">' +
-                        '<span class="gb-item-name">' + escapeHTML(msg.name) + '</span>' +
+                        '<span class="gb-item-name">' + escapeHTML(name) + '</span>' +
                         '<span class="gb-item-time">' + timeStr + '</span>' +
                     '</div>' +
-                    '<div class="gb-item-text">' + escapeHTML(msg.text) + '</div>';
-
+                    '<div class="gb-item-text">' + escapeHTML(text) + '</div>';
                 gbList.appendChild(item);
             });
         })
@@ -819,14 +820,14 @@ function loadMessages() {
         });
 }
 
-/** 转义 HTML，防 XSS */
+/** 转义 HTML */
 function escapeHTML(str) {
     var div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-/** 提交留言到 Firestore */
+/** 提交留言 */
 function submitMessage() {
     var name = gbName.value.trim();
     var text = gbMessage.value.trim();
@@ -844,21 +845,29 @@ function submitMessage() {
         return;
     }
 
-    // 禁用按钮防重复提交
     gbSubmit.disabled = true;
     gbSubmit.textContent = '...';
 
-    messagesRef.add({
-        name: name,
-        text: text,
-        time: firebase.firestore.FieldValue.serverTimestamp()
+    var body = JSON.stringify({
+        fields: {
+            name: { stringValue: name },
+            text: { stringValue: text },
+            time: { timestampValue: new Date().toISOString() }
+        }
+    });
+
+    fetch(GB_BASE + '?key=' + GB_API_KEY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body
     })
-    .then(function() {
+    .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         // 清空表单
         gbName.value = '';
         gbMessage.value = '';
         gbCharCount.textContent = '0';
-        // 重新加载列表
+        // 刷新列表
         loadMessages();
         // 恢复按钮
         gbSubmit.disabled = false;
