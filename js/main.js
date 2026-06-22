@@ -532,46 +532,67 @@ var videoSources = {
 
 /** 打开视频弹窗 */
 function openVideoModal(videoKey) {
+    // 检查关键元素是否存在
+    if (!videoModal || !videoPlayer) {
+        console.error('[视频弹窗] 找不到 videoModal 或 videoPlayer 元素');
+        return;
+    }
     var src = videoSources[videoKey];
     if (!src) {
         console.warn('[视频弹窗] 没有找到视频:', videoKey);
         return;
     }
-    // 设置视频源
-    videoPlayer.querySelector('source') && videoPlayer.querySelector('source').remove();
-    var sourceEl = document.createElement('source');
-    sourceEl.src = src;
-    sourceEl.type = 'video/mp4';
-    videoPlayer.appendChild(sourceEl);
-    videoPlayer.load();
+    // 直接用 src 属性设置视频源（比 source 元素更可靠）
+    videoPlayer.src = src;
     // 设置标题
-    videoModalTitle.textContent = currentLang === 'zh' ? '🎬 演示视频' : '🎬 Demo Video';
+    if (videoModalTitle) {
+        videoModalTitle.textContent = currentLang === 'zh' ? '🎬 演示视频' : '🎬 Demo Video';
+    }
     // 显示弹窗
     videoModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
     // 开始播放
-    videoPlayer.play().catch(function() { /* 自动播放可能被浏览器阻止 */ });
+    videoPlayer.load();
+    videoPlayer.play().catch(function(e) {
+        console.warn('[视频弹窗] 自动播放失败，需要用户手动点击播放:', e.message);
+    });
 }
 
 /** 关闭视频弹窗 */
 function closeVideoModal() {
+    if (!videoModal) return;
     videoModal.classList.remove('open');
-    videoPlayer.pause();
-    // 清空视频源，释放资源
-    videoPlayer.removeAttribute('src');
-    var sourceEl = videoPlayer.querySelector('source');
-    if (sourceEl) sourceEl.remove();
-    videoPlayer.load();
+    document.body.style.overflow = '';
+    if (videoPlayer) {
+        videoPlayer.pause();
+        videoPlayer.src = '';
+    }
 }
 
-// 所有"查看演示"按钮
-document.querySelectorAll('.video-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        openVideoModal(this.getAttribute('data-video'));
+// 所有"查看演示"按钮 — 等 DOM 加载完再绑定
+function bindVideoButtons() {
+    var btns = document.querySelectorAll('.video-btn');
+    console.log('[视频弹窗] 找到 ' + btns.length + ' 个视频按钮');
+    btns.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            console.log('[视频弹窗] 按钮被点击了');
+            openVideoModal(this.getAttribute('data-video'));
+        });
     });
-});
+}
 
-videoModalClose.addEventListener('click', closeVideoModal);
-videoModal.querySelector('.modal-backdrop').addEventListener('click', closeVideoModal);
+// 页面 DOM 已经解析完毕（script 在 body 末尾），直接绑定
+bindVideoButtons();
+
+if (videoModalClose) {
+    videoModalClose.addEventListener('click', closeVideoModal);
+}
+if (videoModal) {
+    var backdrop = videoModal.querySelector('.modal-backdrop');
+    if (backdrop) {
+        backdrop.addEventListener('click', closeVideoModal);
+    }
+}
 
 // ==================== 5. 文章阅读弹窗 ====================
 const articleContents = {
