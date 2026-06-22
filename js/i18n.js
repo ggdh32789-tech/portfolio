@@ -27,9 +27,10 @@ const translations = {
     'code.c2.desc': { zh: '网页上自动生成像素风格的经幡图案，自定义颜色和大小。', en: 'Auto-generate pixel prayer flags. Customize colors and sizes.' },
     'code.c3.title':{ zh: '藏文问候卡片',   en: 'Tibetan Greeting Card' },
     'code.c3.desc': { zh: '像素风格的电子贺卡，支持藏文祝福语，可以发给亲友。', en: 'A pixel e-card with Tibetan blessings to share with family and friends.' },
-    'code.c4.title':{ zh: 'Green Tara · 绿度母', en: 'Green Tara · 3D Art' },
-    'code.c4.desc': { zh: 'WebGL 3D 藏文交互艺术网站，使用 Three.js 构建，探索藏文化与现代网页技术的融合。', en: 'WebGL 3D Tibetan interactive art. Built with Three.js — bridging Tibetan culture and modern web tech.' },
+    'code.c4.title':{ zh: '藏文数字交互 · Targly Magic', en: 'Targly Magic · Tibetan AI' },
+    'code.c4.desc': { zh: '藏文数字识别与交互网页，基于机器学习模型，探索藏文化与AI技术的结合。', en: 'Tibetan digit recognition & interaction. ML-powered — bridging Tibetan culture and AI.' },
     'code.viewDemo': { zh: '查看演示', en: 'Watch Demo' },
+    'code.liveDemo': { zh: '在线体验', en: 'Live Demo' },
 
     // 读书笔记
     'reading.title':  { zh: '读书笔记',        en: 'Reading Notes' },

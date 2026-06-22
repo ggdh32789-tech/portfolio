@@ -527,7 +527,7 @@ var videoModalClose = document.getElementById('videoModalClose');
 
 // 视频文件路径（根据 data-video 属性映射）
 var videoSources = {
-    'green-tara': 'images/599effa6bb95d55dbada79a72f3ff4ed.mp4'
+    'targly-magic': 'images/599effa6bb95d55dbada79a72f3ff4ed.mp4'
 };
 
 /** 打开视频弹窗 */

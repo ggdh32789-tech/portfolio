@@ -90,7 +90,7 @@ portfolio/
 | 邮箱地址 | 🔴 占位 | 显示"等你补充" |
 | GitHub仓库 | 🟢 可选 | Targly-magic 仓库内容待上传 |
 | ~~部署上线~~ | 🟢 已完成 | https://ggdh32789-tech.github.io/portfolio/ |
-| ~~Green Tara 项目~~ | 🟢 已添加 | 第4个代码作品卡片 + 视频演示弹窗 |
+| ~~Green Tara 项目~~ → 藏文数字交互 | 🟢 已修正 | 第4张卡片：Targly Magic 藏文数字识别 + 视频演示 + 在线体验链接 |
 
 ---
 
