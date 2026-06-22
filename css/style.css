@@ -1473,10 +1473,10 @@ body {
 /* ===== 六字真言——像素风格显示 ===== */
 .loader-mantra {
     font-family: var(--font-pixel);
-    font-size: 0.6rem;
+    font-size: 1.2rem;
     color: var(--gold);
-    letter-spacing: 4px;
-    min-height: 28px;
+    letter-spacing: 6px;
+    min-height: 36px;
     text-shadow: 2px 2px 0px rgba(155, 27, 27, 0.3);
 }
 
@@ -1563,8 +1563,8 @@ body {
         height: 8px;
     }
     .loader-mantra {
-        font-size: 0.45rem;
-        letter-spacing: 2px;
+        font-size: 0.8rem;
+        letter-spacing: 3px;
     }
     .loader-bar-wrap {
         width: 150px;
