@@ -34,8 +34,8 @@ const translations = {
     'reading.expand': { zh: '展开阅读',         en: 'Read More' },
     'reading.b1.quote': { zh: '在爱的窄门里，我们都是爱的朝圣者。', en: 'In the narrow gate of love, we are all pilgrims.' },
     'reading.b1.preview': { zh: '阿丽莎犹如朝拜者，一直在追求窄门，从而去远离或逃避现实世俗的欲望和束缚。但逃避并不是解决问题的办法——她所追求的窄门，应该是面对现实困境、看透之后为解脱的一道门。', en: 'Alissa is like a pilgrim, always seeking the narrow gate, escaping worldly desires. But escape solves nothing — the narrow gate she seeks should be a door to liberation found by facing reality head-on.' },
-    'reading.b2.quote': { zh: '安全感、和谐与幸福——这些东西一旦相加，或许看似爱情，也几乎等于爱情，但它们终究不是爱情。', en: 'Security, harmony, and happiness — add them together and they may look like love, almost equal love, but they are ultimately not love.' },
-    'reading.b2.preview': { zh: '人和人的感情太复杂。当我们无法用亲情、友情来概括两个人之间的感情时，就把它丢到爱情这个框子里。我们既把爱情奉上神坛，又把它踩在脚下。', en: 'Human emotions are too complex. When we cannot categorize a relationship as family or friendship, we throw it into the box called love. We both worship love and trample it underfoot.' },
+    'reading.b2.quote': { zh: '我来自拉萨，一座安静的城市，我觉得它很温暖。', en: 'I\'m from Lhasa, which is a quiet city, and I find it very cozy.' },
+    'reading.b2.preview': { zh: '我很崇拜我的老师，他也是我的哥哥。他耐心又幽默，特别是教我英语的时候…', en: 'I\'m a big fan of my teacher, who is my brother. He is patient and humorous, especially when he teaches me English…' },
 
     // 关于我
     'about.title':  { zh: '关于我',         en: 'About Me' },

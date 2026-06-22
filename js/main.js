@@ -516,68 +516,28 @@ const articleContents = {
 
 <blockquote>The Buddha says emptiness. The Tao says self-knowing. God says the narrow gate.</blockquote>`
     },
-    // 《霍乱时期的爱情》读书笔记
+    // 《我的老师》原创文字
     book2: {
-        zh: `<h3>💔 《霍乱时期的爱情》— 马尔克斯</h3>
-<p><em>关于爱情的千百种形态</em></p>
+        zh: `<h3>✏️ 《我的老师》— 旦增塔杰</h3>
+<p><em>写给我哥哥，也是我的老师</em></p>
 
-<h3>被掏空的感觉</h3>
+<p>我来自拉萨，一座安静的城市，我觉得它很温暖。</p>
 
-<p>看完真的感觉被掏空——一种深深的无力感。人和人的感情太复杂了。</p>
+<p>我很崇拜我的老师，他也是我的哥哥。他耐心又幽默，特别是教我英语的时候。我觉得他是个很有趣的人。</p>
 
-<p>当我们无法用亲情、友情来概括两个人之间的感情的时候，就把它丢到爱情这个框子里。我们既把爱情奉上神坛，但又把它踩在脚下。</p>
+<p>我有我的笔记本，他有他的。我的是蓝色的，他的是红色的。</p>
 
-<blockquote>爱的形态是千变万化的——稳定的、激情的、放荡的、妥协的……</blockquote>
+<blockquote>在拉萨安静的时光里，他是我的老师，也是我的哥哥。</blockquote>`,
+        en: `<h3>✏️ "My Teacher" — Tenzin Tagye</h3>
+<p><em>For my brother, who is also my teacher</em></p>
 
-<h3>两个震撼的瞬间</h3>
+<p>I'm from Lhasa, which is a quiet city, and I find it very cozy.</p>
 
-<p>当出轨的医生在临死前说出<em>"只有上帝知道我有多爱你"</em>——</p>
+<p>I'm a big fan of my teacher, who is my brother. He is patient and humorous, especially when he teaches me English. I find him very interesting.</p>
 
-<p>当阿里萨与600多位女士发生关系，但面对费尔明娜仍能发自内心说出<em>"我为你保住了童贞"</em>——</p>
+<p>I have my notes and he has his. Mine is blue and his is red.</p>
 
-<p>难道这不是爱吗？</p>
-
-<h3>爱情是什么</h3>
-
-<p>安全感、和谐与幸福——这些东西一旦相加，或许看似爱情，也几乎等于爱情。但它们终究不是爱情。</p>
-
-<p>爱情与幸福有必然的关系吗？不一定。</p>
-
-<blockquote>但我确定的是：当我们用各种条条框框来定义爱情的时候，那才是对爱情真正的亵渎。</blockquote>
-
-<h3>最后的领悟</h3>
-
-<p>看完这本书我才真正觉得——男人普遍是爱欲分离，渴厌一体；而女人是爱欲一体，渴厌分离。</p>`,
-        en: `<h3>💔 "Love in the Time of Cholera" — Márquez</h3>
-<p><em>On the thousand forms of love</em></p>
-
-<h3>Emptied Out</h3>
-
-<p>After finishing this book, I felt completely emptied — a deep sense of powerlessness. Human emotions are just too complex.</p>
-
-<p>When we can't describe what's between two people as family or friendship, we throw it into the box called "love." We worship love and trample it at the same time.</p>
-
-<blockquote>Love takes a thousand forms — stable, passionate, debauched, compromised…</blockquote>
-
-<h3>Two Unforgettable Moments</h3>
-
-<p>When the cheating doctor says on his deathbed: <em>"Only God knows how much I loved you"</em> —</p>
-
-<p>When Ariza, after sleeping with over 600 women, still says to Fermina from the heart: <em>"I kept my virginity for you"</em> —</p>
-
-<p>Is that not love?</p>
-
-<h3>What Is Love?</h3>
-
-<p>Security, harmony, and happiness — add them together, and they may look like love, almost equal love. But they are ultimately not love.</p>
-
-<p>Is there a necessary connection between love and happiness? Not necessarily.</p>
-
-<blockquote>But I am certain of this: when we use rules and checkboxes to define love — that is the true desecration of love.</blockquote>
-
-<h3>A Final Realization</h3>
-
-<p>After reading this book, I've come to think — men generally separate love from desire, their thirst and disgust are one; while women unite love and desire, their thirst and disgust are apart.</p>`
+<blockquote>In the quiet moments of Lhasa, he is my teacher, and he is my brother.</blockquote>`
     }
 };
 
