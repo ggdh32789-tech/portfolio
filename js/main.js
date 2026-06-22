@@ -899,8 +899,8 @@ const musicHint = document.getElementById('musicHint');
 
 // 国际化提示文字
 var musicLabels = {
-    zh: { play: '🎵 点我放歌', playing: '🎶 播放中…', paused: '⏸ 已暂停' },
-    en: { play: '🎵 Play BGM', playing: '🎶 Playing…', paused: '⏸ Paused' }
+    zh: { play: '🎵 BGM', playing: '🎶 播放中…', paused: '⏸ 已暂停', loading: '🎵 加载中…' },
+    en: { play: '🎵 BGM', playing: '🎶 Playing…', paused: '⏸ Paused', loading: '🎵 Loading…' }
 };
 
 function updateMusicUI() {
@@ -908,33 +908,55 @@ function updateMusicUI() {
     if (bgMusic.paused) {
         musicToggle.classList.remove('playing');
         musicHint.classList.remove('playing');
-        musicToggle.title = currentLang === 'zh' ? '点我播放背景音乐' : 'Click to play BGM';
+        musicToggle.title = currentLang === 'zh' ? '暂停背景音乐' : 'Pause BGM';
         musicHint.textContent = bgMusic.currentTime > 0 ? labels.paused : labels.play;
     } else {
         musicToggle.classList.add('playing');
         musicHint.classList.add('playing');
-        musicToggle.title = currentLang === 'zh' ? '点我暂停背景音乐' : 'Click to pause BGM';
+        musicToggle.title = currentLang === 'zh' ? '暂停背景音乐' : 'Pause BGM';
         musicHint.textContent = labels.playing;
     }
 }
 
+/** 开始播放（带失败重试） */
+function startBGM() {
+    var labels = musicLabels[currentLang] || musicLabels.zh;
+    musicHint.textContent = labels.loading;
+    bgMusic.play().then(function() {
+        updateMusicUI();
+        console.log('[BGM] ✅ 背景音乐开始播放');
+    }).catch(function(e) {
+        console.warn('[BGM] 自动播放被浏览器拦截，等用户点一下屏幕:', e.message);
+        musicHint.textContent = labels.play;
+    });
+}
+
+// 按钮点击：手动切换播放/暂停
 musicToggle.addEventListener('click', function() {
     if (bgMusic.paused) {
-        // 播放
-        bgMusic.play().then(function() {
-            updateMusicUI();
-        }).catch(function(e) {
-            console.warn('[BGM] 播放失败:', e.message);
-            alert('音乐播放失败，请检查网络或浏览器设置');
-        });
+        startBGM();
     } else {
-        // 暂停
         bgMusic.pause();
         updateMusicUI();
     }
 });
 
-// 页面加载时设置初始状态
+// 尝试自动播放（loading 动画结束后）
+window.addEventListener('load', function() {
+    // 推迟 500ms，等 loading 动画完全结束
+    setTimeout(function() {
+        startBGM();
+    }, 500);
+});
+
+// 如果自动播放被拦，用户第一次点击页面任意位置就播
+document.addEventListener('click', function tryAutoPlay() {
+    if (bgMusic.paused && bgMusic.currentTime === 0) {
+        startBGM();
+    }
+}, { once: false }); // 不设 once，每次点击都检查，直到播起来
+
+// 初始化 UI
 updateMusicUI();
 document.querySelector('.music-icon').style.transition = 'transform 0.3s';
 
