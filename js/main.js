@@ -750,9 +750,152 @@ document.querySelectorAll('.read-btn').forEach(function(btn) {
 articleModalClose.addEventListener('click', closeArticleModal);
 articleModal.querySelector('.modal-backdrop').addEventListener('click', closeArticleModal);
 
-// ==================== 6. 留言板 ====================
-// 由 giscus 处理（基于 GitHub Discussions），无需本地代码
-// 配置在 index.html 中的 <script data-repo="ggdh32789-tech/portfolio" ...>
+// ==================== 6. 留言板（Firebase Firestore） ====================
+// 初始化 Firebase
+firebase.initializeApp({
+    apiKey: "AIzaSyB_k_tNTjOQc2Ek8BeICcCvPiMF-JXh2NQ",
+    authDomain: "dtj-portfolio.firebaseapp.com",
+    projectId: "dtj-portfolio",
+    storageBucket: "dtj-portfolio.firebasestorage.app",
+    messagingSenderId: "457196498952",
+    appId: "1:457196498952:web:30524d1123e7cb8009e1bd"
+});
+var db = firebase.firestore();
+var messagesRef = db.collection('guestbook');
+
+var gbName = document.getElementById('gbName');
+var gbMessage = document.getElementById('gbMessage');
+var gbSubmit = document.getElementById('gbSubmit');
+var gbList = document.getElementById('gbList');
+var gbEmpty = document.getElementById('gbEmpty');
+var gbLoading = document.getElementById('gbLoading');
+var gbCharCount = document.getElementById('gbCharCount');
+
+/** 从 Firestore 加载留言（最新 50 条） */
+function loadMessages() {
+    if (!gbLoading) return;
+    gbLoading.style.display = 'block';
+    gbList.innerHTML = '';
+    gbEmpty.style.display = 'none';
+
+    messagesRef
+        .orderBy('time', 'desc')
+        .limit(50)
+        .get()
+        .then(function(snapshot) {
+            gbLoading.style.display = 'none';
+            if (snapshot.empty) {
+                gbEmpty.style.display = 'block';
+                return;
+            }
+            gbEmpty.style.display = 'none';
+            snapshot.forEach(function(doc) {
+                var msg = doc.data();
+                var item = document.createElement('div');
+                item.className = 'gb-item';
+
+                var d = msg.time ? msg.time.toDate() : new Date();
+                var timeStr = d.toLocaleString(
+                    currentLang === 'zh' ? 'zh-CN' : 'en-US',
+                    { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+                );
+
+                item.innerHTML =
+                    '<div class="gb-item-header">' +
+                        '<span class="gb-item-name">' + escapeHTML(msg.name) + '</span>' +
+                        '<span class="gb-item-time">' + timeStr + '</span>' +
+                    '</div>' +
+                    '<div class="gb-item-text">' + escapeHTML(msg.text) + '</div>';
+
+                gbList.appendChild(item);
+            });
+        })
+        .catch(function(err) {
+            gbLoading.style.display = 'none';
+            console.error('[留言板] 加载失败:', err);
+            gbEmpty.style.display = 'block';
+            gbEmpty.querySelector('p').textContent =
+                (currentLang === 'zh' ? '加载失败，请刷新重试 😢' : 'Failed to load, please refresh 😢');
+        });
+}
+
+/** 转义 HTML，防 XSS */
+function escapeHTML(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+/** 提交留言到 Firestore */
+function submitMessage() {
+    var name = gbName.value.trim();
+    var text = gbMessage.value.trim();
+
+    if (!name) {
+        gbName.focus();
+        gbName.style.borderColor = '#9b1b1b';
+        setTimeout(function() { gbName.style.borderColor = ''; }, 1500);
+        return;
+    }
+    if (!text) {
+        gbMessage.focus();
+        gbMessage.style.borderColor = '#9b1b1b';
+        setTimeout(function() { gbMessage.style.borderColor = ''; }, 1500);
+        return;
+    }
+
+    // 禁用按钮防重复提交
+    gbSubmit.disabled = true;
+    gbSubmit.textContent = '...';
+
+    messagesRef.add({
+        name: name,
+        text: text,
+        time: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(function() {
+        // 清空表单
+        gbName.value = '';
+        gbMessage.value = '';
+        gbCharCount.textContent = '0';
+        // 重新加载列表
+        loadMessages();
+        // 恢复按钮
+        gbSubmit.disabled = false;
+        gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">' +
+            t('guestbook.submit', currentLang) + '</span> ✉️';
+    })
+    .catch(function(err) {
+        console.error('[留言板] 提交失败:', err);
+        alert(currentLang === 'zh'
+            ? '发送失败，请检查网络后重试 😢'
+            : 'Failed to send. Check your connection and retry 😢');
+        gbSubmit.disabled = false;
+        gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">' +
+            t('guestbook.submit', currentLang) + '</span> ✉️';
+    });
+}
+
+// 字符计数
+gbMessage.addEventListener('input', function() {
+    var len = this.value.length;
+    gbCharCount.textContent = len;
+    gbCharCount.style.color = len > 450 ? '#9b1b1b' : '';
+});
+
+// 提交按钮
+gbSubmit.addEventListener('click', submitMessage);
+
+// Ctrl+Enter 提交
+gbMessage.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        submitMessage();
+    }
+});
+
+// 初始加载
+loadMessages();
 
 // ==================== 7. 背景音乐播放器 ====================
 const musicToggle = document.getElementById('musicToggle');
