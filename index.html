@@ -423,36 +423,25 @@
                 </h2>
                 <p class="section-desc" data-i18n="guestbook.desc">说点什么吧，像素也会发光 ✨</p>
 
-                <!-- 留言表单 -->
-                <div class="gb-form-wrap">
-                    <div class="gb-form">
-                        <input type="text"
-                               id="gbName"
-                               class="gb-input"
-                               maxlength="30"
-                               data-i18n-placeholder="guestbook.namePlaceholder"
-                               placeholder="你的名字">
-                        <textarea id="gbMessage"
-                                  class="gb-input gb-textarea"
-                                  maxlength="500"
-                                  rows="3"
-                                  data-i18n-placeholder="guestbook.msgPlaceholder"
-                                  placeholder="写下你想说的话…"></textarea>
-                        <div class="gb-form-bottom">
-                            <span class="gb-count"><span id="gbCharCount">0</span>/500</span>
-                            <button class="pixel-btn" id="gbSubmit">
-                                <span data-i18n="guestbook.submit">发送留言</span> ✉️
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 留言列表 -->
-                <div class="gb-list" id="gbList">
-                    <!-- 留言会动态插入到这里 -->
-                </div>
-                <div class="gb-empty" id="gbEmpty">
-                    <p data-i18n="guestbook.empty">还没有留言，来做第一个留下足迹的人吧 👣</p>
+                <!-- giscus 留言系统 — 基于 GitHub Discussions，所有人可见 -->
+                <div class="gb-giscus-wrap">
+                    <script src="https://giscus.app/client.js"
+                        data-repo="ggdh32789-tech/portfolio"
+                        data-repo-id="R_kgDOTB89wQ"
+                        data-category="General"
+                        data-category-id="DIC_kwDOTB89wc4C_rJb"
+                        data-mapping="specific"
+                        data-term="guestbook"
+                        data-strict="0"
+                        data-reactions-enabled="1"
+                        data-emit-metadata="0"
+                        data-input-position="top"
+                        data-theme="dark"
+                        data-lang="zh-CN"
+                        data-loading="lazy"
+                        crossorigin="anonymous"
+                        async>
+                    </script>
                 </div>
             </div>
         </section>

@@ -1262,6 +1262,21 @@ body {
 .code-cards > *:nth-child(3) { animation-delay: 0.2s; }
 .code-cards > *:nth-child(4) { animation-delay: 0.3s; }
 
+/* ==================== 16.5 留言板 Giscus ==================== */
+.gb-giscus-wrap {
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(26, 26, 46, 0.6);
+    border: 2px solid var(--border);
+    box-shadow: 3px 3px 0px rgba(26, 26, 46, 0.3);
+    border-radius: 1px;
+}
+.gb-giscus-wrap .giscus,
+.gb-giscus-wrap .giscus-frame {
+    width: 100%;
+}
+
 /* ==================== 16.5 视频弹窗 ==================== */
 .video-modal-box {
     max-width: 800px;

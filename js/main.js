@@ -6,7 +6,7 @@
    3. 导航高亮 + 手机菜单
    4. 代码预览弹窗
    5. 文章阅读弹窗
-   6. 留言板（localStorage 本地存储）
+   6. 留言板（giscus + GitHub Discussions）
    7. 音乐播放器
    8. 回到顶部
    ============================================================ */
@@ -750,147 +750,9 @@ document.querySelectorAll('.read-btn').forEach(function(btn) {
 articleModalClose.addEventListener('click', closeArticleModal);
 articleModal.querySelector('.modal-backdrop').addEventListener('click', closeArticleModal);
 
-// ==================== 6. 留言板（localStorage） ====================
-const GUESTBOOK_KEY = 'dtj_portfolio_guestbook';
-const gbName = document.getElementById('gbName');
-const gbMessage = document.getElementById('gbMessage');
-const gbSubmit = document.getElementById('gbSubmit');
-const gbList = document.getElementById('gbList');
-const gbEmpty = document.getElementById('gbEmpty');
-const gbCharCount = document.getElementById('gbCharCount');
-
-// 从 localStorage 读取留言
-function loadMessages() {
-    try {
-        return JSON.parse(localStorage.getItem(GUESTBOOK_KEY)) || [];
-    } catch (e) {
-        return [];
-    }
-}
-
-// 保存留言到 localStorage
-function saveMessages(msgs) {
-    localStorage.setItem(GUESTBOOK_KEY, JSON.stringify(msgs));
-}
-
-// 在页面上显示留言
-function renderMessages() {
-    const msgs = loadMessages();
-    gbList.innerHTML = '';
-
-    if (msgs.length === 0) {
-        gbEmpty.style.display = 'block';
-        return;
-    }
-
-    gbEmpty.style.display = 'none';
-
-    // 最新的留言显示在最上面
-    for (let i = msgs.length - 1; i >= 0; i--) {
-        const msg = msgs[i];
-        const item = document.createElement('div');
-        item.className = 'gb-item';
-
-        const timeStr = new Date(msg.time).toLocaleString(
-            currentLang === 'zh' ? 'zh-CN' : 'en-US',
-            { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
-        );
-
-        item.innerHTML =
-            '<div class="gb-item-header">' +
-                '<span class="gb-item-name">' + escapeHTML(msg.name) + '</span>' +
-                '<span class="gb-item-time">' + timeStr + '</span>' +
-            '</div>' +
-            '<div class="gb-item-text">' + escapeHTML(msg.text) + '</div>' +
-            '<button class="gb-item-delete" data-id="' + msg.id + '" title="' +
-                (currentLang === 'zh' ? '删除' : 'Delete') + '">✕</button>';
-
-        // 删除按钮
-        item.querySelector('.gb-item-delete').addEventListener('click', function() {
-            deleteMessage(msg.id);
-        });
-
-        gbList.appendChild(item);
-    }
-}
-
-// 转义 HTML，防止 XSS 攻击
-function escapeHTML(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-// 提交留言
-function submitMessage() {
-    const name = gbName.value.trim();
-    const text = gbMessage.value.trim();
-
-    if (!name) {
-        gbName.focus();
-        gbName.style.borderColor = '#9b1b1b';
-        setTimeout(function() { gbName.style.borderColor = ''; }, 1500);
-        return;
-    }
-    if (!text) {
-        gbMessage.focus();
-        gbMessage.style.borderColor = '#9b1b1b';
-        setTimeout(function() { gbMessage.style.borderColor = ''; }, 1500);
-        return;
-    }
-
-    const msgs = loadMessages();
-    msgs.push({
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-        name: name,
-        text: text,
-        time: Date.now(),
-    });
-
-    saveMessages(msgs);
-    renderMessages();
-
-    // 清空输入
-    gbName.value = '';
-    gbMessage.value = '';
-    gbCharCount.textContent = '0';
-
-    // 简单反馈
-    gbSubmit.textContent = '✓';
-    setTimeout(function() {
-        gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">' +
-            t('guestbook.submit', currentLang) + '</span> ✉️';
-    }, 800);
-}
-
-// 删除留言
-function deleteMessage(id) {
-    let msgs = loadMessages();
-    msgs = msgs.filter(function(m) { return m.id !== id; });
-    saveMessages(msgs);
-    renderMessages();
-}
-
-// 字符计数
-gbMessage.addEventListener('input', function() {
-    const len = this.value.length;
-    gbCharCount.textContent = len;
-    gbCharCount.style.color = len > 450 ? '#9b1b1b' : '';
-});
-
-// 提交按钮
-gbSubmit.addEventListener('click', submitMessage);
-
-// 回车提交（Ctrl+Enter）
-gbMessage.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        submitMessage();
-    }
-});
-
-// 初始加载留言
-renderMessages();
+// ==================== 6. 留言板 ====================
+// 由 giscus 处理（基于 GitHub Discussions），无需本地代码
+// 配置在 index.html 中的 <script data-repo="ggdh32789-tech/portfolio" ...>
 
 // ==================== 7. 背景音乐播放器 ====================
 const musicToggle = document.getElementById('musicToggle');
@@ -988,5 +850,5 @@ document.addEventListener('keydown', function(e) {
 });
 
 console.log('🏔️ 旦增塔杰的 Portfolio — 加载完成！');
-console.log('💡 试试：点击右上角切换语言 / 右下角展开音乐 / 留言板写一条留言~');
-console.log('📝 留言存储在浏览器本地，不会被别人看到。');
+console.log('💡 试试：切换语言 / 播放音乐 / 留言板留个言~');
+console.log('☁️ 留言存储在云端，所有人可见');
