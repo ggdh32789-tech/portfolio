@@ -519,6 +519,60 @@ document.querySelectorAll('.preview-btn').forEach(function(btn) {
 codeModalClose.addEventListener('click', closeCodeModal);
 codeModal.querySelector('.modal-backdrop').addEventListener('click', closeCodeModal);
 
+// ==================== 4.5 视频演示弹窗 ====================
+var videoModal = document.getElementById('videoModal');
+var videoModalTitle = document.getElementById('videoModalTitle');
+var videoPlayer = document.getElementById('videoPlayer');
+var videoModalClose = document.getElementById('videoModalClose');
+
+// 视频文件路径（根据 data-video 属性映射）
+var videoSources = {
+    'green-tara': 'images/599effa6bb95d55dbada79a72f3ff4ed.mp4'
+};
+
+/** 打开视频弹窗 */
+function openVideoModal(videoKey) {
+    var src = videoSources[videoKey];
+    if (!src) {
+        console.warn('[视频弹窗] 没有找到视频:', videoKey);
+        return;
+    }
+    // 设置视频源
+    videoPlayer.querySelector('source') && videoPlayer.querySelector('source').remove();
+    var sourceEl = document.createElement('source');
+    sourceEl.src = src;
+    sourceEl.type = 'video/mp4';
+    videoPlayer.appendChild(sourceEl);
+    videoPlayer.load();
+    // 设置标题
+    videoModalTitle.textContent = currentLang === 'zh' ? '🎬 演示视频' : '🎬 Demo Video';
+    // 显示弹窗
+    videoModal.classList.add('open');
+    // 开始播放
+    videoPlayer.play().catch(function() { /* 自动播放可能被浏览器阻止 */ });
+}
+
+/** 关闭视频弹窗 */
+function closeVideoModal() {
+    videoModal.classList.remove('open');
+    videoPlayer.pause();
+    // 清空视频源，释放资源
+    videoPlayer.removeAttribute('src');
+    var sourceEl = videoPlayer.querySelector('source');
+    if (sourceEl) sourceEl.remove();
+    videoPlayer.load();
+}
+
+// 所有"查看演示"按钮
+document.querySelectorAll('.video-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        openVideoModal(this.getAttribute('data-video'));
+    });
+});
+
+videoModalClose.addEventListener('click', closeVideoModal);
+videoModal.querySelector('.modal-backdrop').addEventListener('click', closeVideoModal);
+
 // ==================== 5. 文章阅读弹窗 ====================
 const articleContents = {
     // 《窄门》读书笔记
@@ -852,6 +906,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         if (codeModal.classList.contains('open')) closeCodeModal();
         if (articleModal.classList.contains('open')) closeArticleModal();
+        if (videoModal.classList.contains('open')) closeVideoModal();
     }
 });
 

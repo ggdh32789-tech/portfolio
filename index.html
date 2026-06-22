@@ -384,6 +384,28 @@
                             </a>
                         </div>
                     </div>
+
+                    <!-- ========== 第4个项目：Green Tara 藏文3D交互网站 ========== -->
+                    <div class="card code-card">
+                        <div class="card-top">
+                            <span class="card-emoji">🖥️</span>
+                            <h3 class="card-heading" data-i18n="code.c4.title">Green Tara · 绿度母</h3>
+                            <p class="card-text" data-i18n="code.c4.desc">WebGL 3D 藏文交互艺术网站，使用 Three.js 构建，探索藏文化与现代网页技术的融合。</p>
+                            <div class="card-tags">
+                                <span class="tag">Three.js</span>
+                                <span class="tag">WebGL</span>
+                                <span class="tag">JavaScript</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="pixel-btn video-btn" data-video="green-tara">
+                                <span data-i18n="code.viewDemo">查看演示</span> 🎬
+                            </button>
+                            <a href="https://github.com/ggdh32789-tech/green-tara" target="_blank" rel="noopener" class="pixel-btn pixel-btn-outline">
+                                <span data-i18n="code.viewRepo">项目仓库</span> 🔗
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -488,6 +510,22 @@
             </div>
             <div class="modal-body article-body" id="articleModalBody">
                 <!-- 文章内容动态填入 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 视频演示弹窗 ==================== -->
+    <div class="modal" id="videoModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-box video-modal-box">
+            <div class="modal-head">
+                <h3 class="modal-title" id="videoModalTitle">🎬 演示视频</h3>
+                <button class="pixel-btn modal-close-btn" id="videoModalClose">✕</button>
+            </div>
+            <div class="modal-body video-modal-body">
+                <video id="videoPlayer" controls playsinline>
+                    你的浏览器不支持视频播放
+                </video>
             </div>
         </div>
     </div>
