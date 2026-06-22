@@ -892,16 +892,50 @@ gbMessage.addEventListener('keydown', function(e) {
 // 初始加载留言
 renderMessages();
 
-// ==================== 7. 音乐播放器 ====================
+// ==================== 7. 背景音乐播放器 ====================
 const musicToggle = document.getElementById('musicToggle');
-const musicPanel = document.getElementById('musicPanel');
+const bgMusic = document.getElementById('bgMusic');
+const musicHint = document.getElementById('musicHint');
+
+// 国际化提示文字
+var musicLabels = {
+    zh: { play: '🎵 点我放歌', playing: '🎶 播放中…', paused: '⏸ 已暂停' },
+    en: { play: '🎵 Play BGM', playing: '🎶 Playing…', paused: '⏸ Paused' }
+};
+
+function updateMusicUI() {
+    var labels = musicLabels[currentLang] || musicLabels.zh;
+    if (bgMusic.paused) {
+        musicToggle.classList.remove('playing');
+        musicHint.classList.remove('playing');
+        musicToggle.title = currentLang === 'zh' ? '点我播放背景音乐' : 'Click to play BGM';
+        musicHint.textContent = bgMusic.currentTime > 0 ? labels.paused : labels.play;
+    } else {
+        musicToggle.classList.add('playing');
+        musicHint.classList.add('playing');
+        musicToggle.title = currentLang === 'zh' ? '点我暂停背景音乐' : 'Click to pause BGM';
+        musicHint.textContent = labels.playing;
+    }
+}
 
 musicToggle.addEventListener('click', function() {
-    musicPanel.classList.toggle('open');
-    const icon = this.querySelector('.music-icon');
-    icon.style.transform = musicPanel.classList.contains('open')
-        ? 'rotate(45deg)' : 'rotate(0deg)';
+    if (bgMusic.paused) {
+        // 播放
+        bgMusic.play().then(function() {
+            updateMusicUI();
+        }).catch(function(e) {
+            console.warn('[BGM] 播放失败:', e.message);
+            alert('音乐播放失败，请检查网络或浏览器设置');
+        });
+    } else {
+        // 暂停
+        bgMusic.pause();
+        updateMusicUI();
+    }
 });
+
+// 页面加载时设置初始状态
+updateMusicUI();
 document.querySelector('.music-icon').style.transition = 'transform 0.3s';
 
 // ==================== 8. 回到顶部 ====================

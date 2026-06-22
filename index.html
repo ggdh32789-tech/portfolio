@@ -459,21 +459,14 @@
 
     </main>
 
-    <!-- ==================== 音乐播放器 ==================== -->
-    <!-- 本地音频文件——最稳定，不依赖任何外部服务 -->
+    <!-- ==================== 背景音乐播放器 ==================== -->
+    <!-- 点一下播放，再点暂停——简单直接 -->
     <div class="music-bar" id="musicBar">
-        <span class="music-hint">🎵 BGM</span>
-        <button class="music-toggle-btn" id="musicToggle" title="点击播放/暂停背景音乐">
+        <button class="music-toggle-btn" id="musicToggle" title="点我播放背景音乐">
             <span class="music-icon">🎵</span>
         </button>
-        <div class="music-panel" id="musicPanel">
-            <!-- 歌名 + HTML5 原生播放器 -->
-            <p class="music-title">geerad — saturdaycartoons</p>
-            <audio id="bgMusic" src="music/bgm.mp3" controls loop
-                   preload="none">
-                你的浏览器不支持音频播放
-            </audio>
-        </div>
+        <span class="music-hint" id="musicHint">点我放歌</span>
+        <audio id="bgMusic" src="music/bgm.mp3" loop preload="auto"></audio>
     </div>
 
     <!-- ==================== 页脚 ==================== -->
