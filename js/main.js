@@ -198,17 +198,17 @@ langToggle.addEventListener('click', function() {
     switchLanguage(currentLang === 'zh' ? 'en' : 'zh');
 });
 
-// 页面加载时应用语言
-switchLanguage(currentLang);
-
 // ==================== 2. 打字机效果 ====================
 const typingText = document.getElementById('typingText');
 const phrases = {
     zh: ['像素与代码之间', '经幡在风中飘扬', '代码也能有温度', '雪山下的程序员'],
     en: ['Between pixels & code', 'Prayer flags in wind', 'Code has warmth too', 'Coder under the snow'],
 };
-let typingTimer = null;
-let phraseIdx = 0;
+var typingTimer = null;  // var 会变量提升，避免 let 的暂时性死区
+var phraseIdx = 0;
+
+// 页面加载时应用语言（放在 typingTimer 声明之后）
+switchLanguage(currentLang);
 
 function typePhrase(text, done) {
     let i = 0;
