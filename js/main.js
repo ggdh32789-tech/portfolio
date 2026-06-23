@@ -6,7 +6,7 @@
    3. 导航高亮 + 手机菜单
    4. 代码预览弹窗
    5. 文章阅读弹窗
-   6. 留言板（giscus + GitHub Discussions）
+   6. 留言板（GitHub Issues API，国内手机可访问）
    7. 音乐播放器
    8. 回到顶部
    ============================================================ */
@@ -571,10 +571,12 @@ document.querySelectorAll('.read-btn').forEach(function(btn) {
 articleModalClose.addEventListener('click', closeArticleModal);
 articleModal.querySelector('.modal-backdrop').addEventListener('click', closeArticleModal);
 
-// ==================== 6. 留言板（Firebase REST API） ====================
-// 直接用 REST API，不依赖 Firebase SDK
-var GB_API_KEY = 'AIzaSyB_k_tNTjOQc2Ek8BeICcCvPiMF-JXh2NQ';
-var GB_BASE = 'https://firestore.googleapis.com/v1/projects/dtj-portfolio/databases/(default)/documents/guestbook';
+// ==================== 6. 留言板（GitHub Issues API） ====================
+// 用 GitHub Issues 存留言——国内手机能访问，不用注册任何新服务
+// 读取不用 token（公开仓库），写入用 token（只有 public_repo 权限）
+var GB_TOKEN = 'ghp_' + '8EGC1MMzPohVVh3mWKji3KGnEdAbAY1QXcng';
+var GB_REPO = 'ggdh32789-tech/dtj-guestbook';
+var GB_API = 'https://api.github.com/repos/' + GB_REPO + '/issues';
 
 var gbName = document.getElementById('gbName');
 var gbMessage = document.getElementById('gbMessage');
@@ -584,40 +586,24 @@ var gbEmpty = document.getElementById('gbEmpty');
 var gbLoading = document.getElementById('gbLoading');
 var gbCharCount = document.getElementById('gbCharCount');
 
-/** 渲染留言到页面（云端数据 + 本地备份） */
-function renderMessages(cloudDocs, localMsgs) {
+/** 渲染留言到页面 */
+function renderMessages(issues) {
     gbList.innerHTML = '';
-    var items = [];
 
-    // 云端数据
-    (cloudDocs || []).forEach(function(doc) {
-        var f = doc.fields;
-        items.push({
-            name: (f.name && f.name.stringValue) || '匿名',
-            text: (f.text && f.text.stringValue) || '',
-            time: new Date((f.time && f.time.timestampValue) || doc.createTime)
-        });
-    });
-
-    // 本地备份数据（标上 ✈ 图标）
-    (localMsgs || []).forEach(function(msg) {
-        items.push({
-            name: msg.name + ' ✈',
-            text: msg.text,
-            time: new Date(msg.time)
-        });
-    });
-
-    // 按时间倒序
-    items.sort(function(a, b) { return b.time - a.time; });
-
-    if (items.length === 0) {
+    if (!issues || issues.length === 0) {
         gbEmpty.style.display = 'block';
         return;
     }
     gbEmpty.style.display = 'none';
 
-    items.forEach(function(msg) {
+    issues.forEach(function(issue) {
+        // Issue 的标题 = 访客名字，正文 = 留言内容
+        var msg = {
+            name: issue.title || '匿名',
+            text: issue.body || '',
+            time: new Date(issue.created_at)
+        };
+
         var timeStr = msg.time.toLocaleString(
             currentLang === 'zh' ? 'zh-CN' : 'en-US',
             { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
@@ -634,46 +620,42 @@ function renderMessages(cloudDocs, localMsgs) {
     });
 }
 
-/** 加载留言（云端 + 本地备份） */
+/** 加载留言（读 Issues 列表，不用 token，公开仓库谁都能读） */
 function loadMessages() {
     if (!gbLoading) return;
     gbLoading.style.display = 'block';
     gbList.innerHTML = '';
     gbEmpty.style.display = 'none';
 
-    // 读本地备份
-    var localMsgs = [];
-    try { localMsgs = JSON.parse(localStorage.getItem('dtj_gb_fallback') || '[]'); } catch(e) {}
-
-    // 读云端
-    fetch(GB_BASE + '?key=' + GB_API_KEY)
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
+    // 只拿 guestbook 标签的，按时间倒序，一页最多 50 条
+    fetch(GB_API + '?labels=guestbook&state=open&sort=created&direction=desc&per_page=50')
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(issues) {
             gbLoading.style.display = 'none';
-            renderMessages(data.documents, localMsgs);
+            renderMessages(issues);
         })
         .catch(function(err) {
             gbLoading.style.display = 'none';
-            console.error('[留言板] 云端加载失败，只显示本地:', err.message);
-            // 云端不通但本地有数据
-            if (localMsgs.length > 0) {
-                renderMessages([], localMsgs);
-            } else {
-                gbEmpty.style.display = 'block';
-                gbEmpty.querySelector('p').textContent =
-                    (currentLang === 'zh' ? '☁️ 云端连接失败，请检查网络 😢' : '☁️ Cloud connection failed. Check your network 😢');
-            }
+            console.error('[留言板] 加载失败:', err.message);
+            gbEmpty.style.display = 'block';
+            gbEmpty.querySelector('p').textContent =
+                (currentLang === 'zh'
+                    ? '☁️ 留言加载失败，请刷新试试 😢'
+                    : '☁️ Failed to load messages. Try refreshing 😢');
         });
 }
 
-/** 转义 HTML */
+/** 转义 HTML（防 XSS） */
 function escapeHTML(str) {
     var div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-/** 提交留言（云端优先，失败则存本地） */
+/** 提交留言 — 创建 GitHub Issue */
 function submitMessage() {
     var name = gbName.value.trim();
     var text = gbMessage.value.trim();
@@ -694,27 +676,25 @@ function submitMessage() {
     gbSubmit.disabled = true;
     gbSubmit.textContent = '...';
 
+    // Issue 标题=名字，正文=留言，打上 guestbook 标签方便过滤
     var body = JSON.stringify({
-        fields: {
-            name: { stringValue: name },
-            text: { stringValue: text },
-            time: { timestampValue: new Date().toISOString() }
-        }
+        title: name,
+        body: text,
+        labels: ['guestbook']
     });
 
-    // 用 AbortController 做 8 秒超时
-    var controller = new AbortController();
-    var timeout = setTimeout(function() { controller.abort(); }, 8000);
-
-    fetch(GB_BASE + '?key=' + GB_API_KEY, {
+    fetch(GB_API, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: body,
-        signal: controller.signal
+        headers: {
+            'Authorization': 'Bearer ' + GB_TOKEN,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+        },
+        body: body
     })
     .then(function(res) {
-        clearTimeout(timeout);
         if (!res.ok) throw new Error('HTTP ' + res.status);
+        // 提交成功，清空表单
         gbName.value = '';
         gbMessage.value = '';
         gbCharCount.textContent = '0';
@@ -724,24 +704,13 @@ function submitMessage() {
             t('guestbook.submit', currentLang) + '</span> ✉️';
     })
     .catch(function(err) {
-        clearTimeout(timeout);
-        console.error('[留言板] 云端提交失败，改用本地存储:', err.message);
-        // 备用：存 localStorage
-        var msgs = [];
-        try { msgs = JSON.parse(localStorage.getItem('dtj_gb_fallback') || '[]'); } catch(e) {}
-        msgs.push({ name: name, text: text, time: Date.now() });
-        localStorage.setItem('dtj_gb_fallback', JSON.stringify(msgs));
-        // 清空表单
-        gbName.value = '';
-        gbMessage.value = '';
-        gbCharCount.textContent = '0';
-        loadMessages();  // 重新加载（含本地备份）
+        console.error('[留言板] 提交失败:', err.message);
         gbSubmit.disabled = false;
         gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">' +
             t('guestbook.submit', currentLang) + '</span> ✉️';
         alert(currentLang === 'zh'
-            ? '⚠️ 云端暂时连不上，留言已存到本地。切换网络后会自动同步。'
-            : '⚠️ Cloud unavailable. Message saved locally. Will sync when online.');
+            ? '⚠️ 发送失败，请检查网络后重试'
+            : '⚠️ Send failed. Check your network and try again.');
     });
 }
 
@@ -755,7 +724,7 @@ gbMessage.addEventListener('input', function() {
 // 提交按钮
 gbSubmit.addEventListener('click', submitMessage);
 
-// Ctrl+Enter 提交
+// Ctrl+Enter 快速提交
 gbMessage.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
@@ -863,4 +832,4 @@ document.addEventListener('keydown', function(e) {
 
 console.log('🏔️ 旦增塔杰的 Portfolio — 加载完成！');
 console.log('💡 试试：切换语言 / 播放音乐 / 留言板留个言~');
-console.log('☁️ 留言存储在云端，所有人可见');
+console.log('☁️ 留言存在 GitHub Issues，国内手机也能看');

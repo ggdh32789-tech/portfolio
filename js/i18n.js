@@ -58,7 +58,7 @@ const translations = {
     'guestbook.msgPlaceholder':  { zh: '写下你想说的话…', en: 'Write something…' },
     'guestbook.submit':      { zh: '发送留言',        en: 'Send' },
     'guestbook.empty':       { zh: '还没有留言，来做第一个留下足迹的人吧 👣', en: 'No messages yet. Be the first to leave a footprint 👣' },
-    'guestbook.deleted':     { zh: '留言已删除',      en: 'Deleted' },
+    'guestbook.deleted':     { zh: '留言已删除',      en: 'Deleted' },  // 暂未使用（GitHub Issues 不支持客户端删除）
 
     // 页脚
     'footer.name':    { zh: '旦增塔杰',      en: 'Tenzin Tagye' },

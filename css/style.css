@@ -846,118 +846,7 @@ body {
     );
 }
 
-/* 留言表单 */
-.gb-form-wrap {
-    max-width: 600px;
-    margin: 0 auto 40px;
-}
-.gb-form {
-    background: var(--cream);
-    padding: 28px;
-    box-shadow:
-        4px 4px 0px rgba(26, 26, 46, 0.25),
-        8px 8px 0px rgba(155, 27, 27, 0.12),
-        10px 10px 0px rgba(212, 168, 67, 0.06);
-    border: 2px solid var(--border);
-    border-image: linear-gradient(
-        135deg,
-        var(--gold) 0px, var(--gold) 2px,
-        transparent 2px, transparent 6px,
-        var(--red) 6px, var(--red) 8px,
-        transparent 8px, transparent 100%
-    ) 1;
-}
-.gb-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid var(--border);
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    color: var(--text);
-    background: #fff;
-    outline: none;
-    transition: border-color 0.3s;
-    margin-bottom: 12px;
-    resize: vertical;
-}
-.gb-input:focus {
-    border-color: var(--gold);
-    box-shadow: 2px 2px 0px rgba(212, 168, 67, 0.15);
-}
-.gb-input::placeholder {
-    color: #c0bdb5;
-}
-.gb-textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-.gb-form-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.gb-count {
-    font-family: var(--font-pixel);
-    font-size: 0.42rem;
-    color: var(--text-light);
-}
-
-/* 留言列表 */
-.gb-list {
-    max-width: 600px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-.gb-item {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 20px 24px;
-    box-shadow: 3px 3px 0px rgba(26, 26, 46, 0.2);
-}
-.gb-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-.gb-item-name {
-    font-family: var(--font-pixel);
-    font-size: 0.48rem;
-    color: var(--gold);
-}
-.gb-item-time {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.3);
-}
-.gb-item-text {
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.65);
-    line-height: 1.7;
-    word-break: break-word;
-}
-.gb-item-delete {
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.2);
-    cursor: pointer;
-    font-size: 0.8rem;
-    padding: 2px 6px;
-    transition: color 0.3s;
-}
-.gb-item-delete:hover {
-    color: var(--red);
-}
-
-.gb-empty {
-    text-align: center;
-    padding: 40px;
-}
-.gb-empty p {
-    color: rgba(255,255,255,0.3);
-    font-size: 0.9rem;
-}
+/* 留言板样式 —— 见底部 16.5 节 */
 
 /* ==================== 11. 音乐播放器 ==================== */
 .music-bar {
@@ -1262,7 +1151,7 @@ body {
 }
 .code-cards > *:nth-child(2) { animation-delay: 0.15s; }
 
-/* ==================== 16.5 留言板 Firebase ==================== */
+/* ==================== 16.5 留言板（GitHub Issues API） ==================== */
 .gb-firebase-wrap {
     max-width: 650px;
     margin: 28px auto 0;
