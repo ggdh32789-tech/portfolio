@@ -584,60 +584,85 @@ var gbEmpty = document.getElementById('gbEmpty');
 var gbLoading = document.getElementById('gbLoading');
 var gbCharCount = document.getElementById('gbCharCount');
 
-/** 从 Firestore 加载留言 */
+/** 渲染留言到页面（云端数据 + 本地备份） */
+function renderMessages(cloudDocs, localMsgs) {
+    gbList.innerHTML = '';
+    var items = [];
+
+    // 云端数据
+    (cloudDocs || []).forEach(function(doc) {
+        var f = doc.fields;
+        items.push({
+            name: (f.name && f.name.stringValue) || '匿名',
+            text: (f.text && f.text.stringValue) || '',
+            time: new Date((f.time && f.time.timestampValue) || doc.createTime)
+        });
+    });
+
+    // 本地备份数据（标上 ✈ 图标）
+    (localMsgs || []).forEach(function(msg) {
+        items.push({
+            name: msg.name + ' ✈',
+            text: msg.text,
+            time: new Date(msg.time)
+        });
+    });
+
+    // 按时间倒序
+    items.sort(function(a, b) { return b.time - a.time; });
+
+    if (items.length === 0) {
+        gbEmpty.style.display = 'block';
+        return;
+    }
+    gbEmpty.style.display = 'none';
+
+    items.forEach(function(msg) {
+        var timeStr = msg.time.toLocaleString(
+            currentLang === 'zh' ? 'zh-CN' : 'en-US',
+            { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+        );
+        var item = document.createElement('div');
+        item.className = 'gb-item';
+        item.innerHTML =
+            '<div class="gb-item-header">' +
+                '<span class="gb-item-name">' + escapeHTML(msg.name) + '</span>' +
+                '<span class="gb-item-time">' + timeStr + '</span>' +
+            '</div>' +
+            '<div class="gb-item-text">' + escapeHTML(msg.text) + '</div>';
+        gbList.appendChild(item);
+    });
+}
+
+/** 加载留言（云端 + 本地备份） */
 function loadMessages() {
     if (!gbLoading) return;
     gbLoading.style.display = 'block';
     gbList.innerHTML = '';
     gbEmpty.style.display = 'none';
 
+    // 读本地备份
+    var localMsgs = [];
+    try { localMsgs = JSON.parse(localStorage.getItem('dtj_gb_fallback') || '[]'); } catch(e) {}
+
+    // 读云端
     fetch(GB_BASE + '?key=' + GB_API_KEY)
         .then(function(res) { return res.json(); })
         .then(function(data) {
             gbLoading.style.display = 'none';
-            var docs = data.documents || [];
-            if (docs.length === 0) {
-                gbEmpty.style.display = 'block';
-                return;
-            }
-            gbEmpty.style.display = 'none';
-
-            // 按时间倒序排列
-            docs.sort(function(a, b) {
-                var ta = a.fields.time ? a.fields.time.timestampValue : a.createTime;
-                var tb = b.fields.time ? b.fields.time.timestampValue : b.createTime;
-                return tb.localeCompare(ta);
-            });
-
-            docs.forEach(function(doc) {
-                var f = doc.fields;
-                var name = (f.name && f.name.stringValue) || '匿名';
-                var text = (f.text && f.text.stringValue) || '';
-                var timeVal = (f.time && f.time.timestampValue) || doc.createTime;
-
-                var d = new Date(timeVal);
-                var timeStr = d.toLocaleString(
-                    currentLang === 'zh' ? 'zh-CN' : 'en-US',
-                    { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
-                );
-
-                var item = document.createElement('div');
-                item.className = 'gb-item';
-                item.innerHTML =
-                    '<div class="gb-item-header">' +
-                        '<span class="gb-item-name">' + escapeHTML(name) + '</span>' +
-                        '<span class="gb-item-time">' + timeStr + '</span>' +
-                    '</div>' +
-                    '<div class="gb-item-text">' + escapeHTML(text) + '</div>';
-                gbList.appendChild(item);
-            });
+            renderMessages(data.documents, localMsgs);
         })
         .catch(function(err) {
             gbLoading.style.display = 'none';
-            console.error('[留言板] 加载失败:', err);
-            gbEmpty.style.display = 'block';
-            gbEmpty.querySelector('p').textContent =
-                (currentLang === 'zh' ? '加载失败，请刷新重试 😢' : 'Failed to load, please refresh 😢');
+            console.error('[留言板] 云端加载失败，只显示本地:', err.message);
+            // 云端不通但本地有数据
+            if (localMsgs.length > 0) {
+                renderMessages([], localMsgs);
+            } else {
+                gbEmpty.style.display = 'block';
+                gbEmpty.querySelector('p').textContent =
+                    (currentLang === 'zh' ? '☁️ 云端连接失败，请检查网络 😢' : '☁️ Cloud connection failed. Check your network 😢');
+            }
         });
 }
 
@@ -648,7 +673,7 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
-/** 提交留言 */
+/** 提交留言（云端优先，失败则存本地） */
 function submitMessage() {
     var name = gbName.value.trim();
     var text = gbMessage.value.trim();
@@ -677,32 +702,46 @@ function submitMessage() {
         }
     });
 
+    // 用 AbortController 做 8 秒超时
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 8000);
+
     fetch(GB_BASE + '?key=' + GB_API_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: body
+        body: body,
+        signal: controller.signal
     })
     .then(function(res) {
+        clearTimeout(timeout);
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        // 清空表单
         gbName.value = '';
         gbMessage.value = '';
         gbCharCount.textContent = '0';
-        // 刷新列表
         loadMessages();
-        // 恢复按钮
         gbSubmit.disabled = false;
         gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">' +
             t('guestbook.submit', currentLang) + '</span> ✉️';
     })
     .catch(function(err) {
-        console.error('[留言板] 提交失败:', err);
-        alert(currentLang === 'zh'
-            ? '发送失败，请检查网络后重试 😢'
-            : 'Failed to send. Check your connection and retry 😢');
+        clearTimeout(timeout);
+        console.error('[留言板] 云端提交失败，改用本地存储:', err.message);
+        // 备用：存 localStorage
+        var msgs = [];
+        try { msgs = JSON.parse(localStorage.getItem('dtj_gb_fallback') || '[]'); } catch(e) {}
+        msgs.push({ name: name, text: text, time: Date.now() });
+        localStorage.setItem('dtj_gb_fallback', JSON.stringify(msgs));
+        // 清空表单
+        gbName.value = '';
+        gbMessage.value = '';
+        gbCharCount.textContent = '0';
+        loadMessages();  // 重新加载（含本地备份）
         gbSubmit.disabled = false;
         gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">' +
             t('guestbook.submit', currentLang) + '</span> ✉️';
+        alert(currentLang === 'zh'
+            ? '⚠️ 云端暂时连不上，留言已存到本地。切换网络后会自动同步。'
+            : '⚠️ Cloud unavailable. Message saved locally. Will sync when online.');
     });
 }
 
