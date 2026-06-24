@@ -331,8 +331,8 @@
                             </div>
                         </div>
                         <div class="card-actions">
-                            <button class="pixel-btn preview-btn" data-code="code3">
-                                <span data-i18n="code.viewCode">查看代码</span> ▶
+                            <button class="pixel-btn greeting-open-btn">
+                                <span data-i18n="greeting.openEditor">生成贺卡</span> ▶
                             </button>
                             <a href="https://github.com/ggdh32789-tech/Targly-magic" target="_blank" rel="noopener" class="pixel-btn pixel-btn-outline">
                                 <span data-i18n="code.viewRepo">项目仓库</span> 🔗
@@ -484,6 +484,70 @@
         </div>
     </div>
 
+    <!-- ==================== 藏文书本贺卡弹窗 ==================== -->
+    <div class="modal" id="greetingModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-box greeting-modal-box">
+            <div class="modal-head">
+                <h3 class="modal-title" id="greetingModalTitle">📖 书本贺卡</h3>
+                <button class="pixel-btn modal-close-btn" id="greetingModalClose">✕</button>
+            </div>
+            <div class="modal-body greeting-modal-body">
+
+                <!-- ===== 语录选择下拉框 ===== -->
+                <div class="greeting-quote-select-wrap">
+                    <select id="greetingQuoteSelect" class="greeting-quote-select">
+                        <option value="-1" data-i18n="greeting.selectQuote">— 选择宗萨钦哲仁波切语录 —</option>
+                        <!-- JS 动态生成语录选项 -->
+                    </select>
+                </div>
+
+                <!-- ===== 编辑区：四行输入 ===== -->
+                <div class="greeting-editor" id="greetingEditor">
+                    <!-- 藏文两行 -->
+                    <textarea id="greetingTib1" class="greeting-input tibetan-input"
+                              maxlength="200" rows="1"
+                              placeholder="藏文第一行…"></textarea>
+                    <textarea id="greetingTib2" class="greeting-input tibetan-input"
+                              maxlength="200" rows="1"
+                              placeholder="藏文第二行…"></textarea>
+
+                    <!-- 微妙分隔 -->
+                    <div class="greeting-sep"></div>
+
+                    <!-- 中文两行 -->
+                    <textarea id="greetingChn1" class="greeting-input chinese-input"
+                              maxlength="200" rows="1"
+                              placeholder="中文第一行…"></textarea>
+                    <textarea id="greetingChn2" class="greeting-input chinese-input"
+                              maxlength="200" rows="1"
+                              placeholder="中文第二行…"></textarea>
+                </div>
+
+                <!-- ===== 预览区（初始隐藏） ===== -->
+                <div class="greeting-preview" id="greetingPreview" style="display:none;">
+                    <div class="greeting-canvas-wrap">
+                        <canvas id="greetingCanvas" width="1200" height="1600"></canvas>
+                    </div>
+                    <div class="greeting-actions">
+                        <button class="pixel-btn" id="greetingDownload" type="button">
+                            💾 <span data-i18n="greeting.download">下载保存</span>
+                        </button>
+                        <button class="pixel-btn pixel-btn-outline" id="greetingRegenerate" type="button">
+                            ✏️ <span data-i18n="greeting.regenerate">自己写</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 生成按钮 -->
+                <button class="pixel-btn greeting-generate-btn" id="greetingGenerate" type="button">
+                    ✨ <span data-i18n="greeting.generate">生成贺卡</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== JavaScript ==================== -->
     <!-- highlight.js 代码高亮 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -493,5 +557,7 @@
     <script src="js/background.js"></script>
     <!-- 主逻辑 -->
     <script src="js/main.js"></script>
+    <!-- 藏文贺卡生成器 -->
+    <script src="js/greeting-card.js"></script>
 </body>
 </html>

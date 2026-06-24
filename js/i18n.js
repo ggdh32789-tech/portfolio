@@ -60,6 +60,13 @@ const translations = {
     'guestbook.empty':       { zh: '还没有留言，来做第一个留下足迹的人吧 👣', en: 'No messages yet. Be the first to leave a footprint 👣' },
     'guestbook.deleted':     { zh: '留言已删除',      en: 'Deleted' },  // 暂未使用（GitHub Issues 不支持客户端删除）
 
+    // 藏文贺卡
+    'greeting.openEditor':  { zh: '生成贺卡',       en: 'Create Card' },
+    'greeting.selectQuote': { zh: '— 选择宗萨钦哲仁波切语录 —', en: '— Select a Quote —' },
+    'greeting.generate':    { zh: '生成贺卡',       en: 'Generate Card' },
+    'greeting.download':    { zh: '下载保存',       en: 'Download' },
+    'greeting.regenerate':  { zh: '自己写',         en: 'Write My Own' },
+
     // 页脚
     'footer.name':    { zh: '旦增塔杰',      en: 'Tenzin Tagye' },
     'footer.tagline': { zh: '用像素和经幡搭建', en: 'Built with pixels & prayer flags' },

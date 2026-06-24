@@ -1276,6 +1276,139 @@ body {
     box-shadow: 1px 1px 0px rgba(26, 26, 46, 0.15);
 }
 
+/* ==================== 16.6 藏文贺卡弹窗 — 极简书本风格 ==================== */
+.greeting-modal-box {
+    max-width: 600px;
+}
+
+.greeting-modal-body {
+    padding: 24px;
+}
+
+/* 语录下拉框 */
+.greeting-quote-select-wrap {
+    margin-bottom: 20px;
+}
+.greeting-quote-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d5d0c8;
+    background: #fdfaf3;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 0.85rem;
+    color: #2c2c2c;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px rgba(26, 26, 46, 0.05);
+    transition: border-color 0.2s;
+}
+.greeting-quote-select:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+/* 输入框通用 */
+.greeting-editor .greeting-input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #d5d0c8;
+    background: #fdfaf3;
+    color: #2c2c2c;
+    font-family: 'Noto Sans SC', sans-serif;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    resize: none;
+    overflow: hidden;
+    box-shadow: inset 0px 1px 3px rgba(0,0,0,0.04);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.greeting-editor .greeting-input:focus {
+    outline: none;
+    border-color: #8b8b8b;
+    box-shadow: inset 0px 1px 3px rgba(0,0,0,0.04), 0px 0px 0px 2px rgba(0,0,0,0.04);
+}
+.greeting-editor .greeting-input::placeholder {
+    color: #bcb8b0;
+}
+
+/* 藏文输入 — 更大字号、更大行距 */
+.tibetan-input {
+    font-size: 1.1rem !important;
+    line-height: 2 !important;
+}
+
+/* 中文输入 */
+.chinese-input {
+    font-size: 0.95rem !important;
+    line-height: 1.8 !important;
+}
+
+/* 微妙分隔线 */
+.greeting-sep {
+    width: 50%;
+    height: 1px;
+    background: rgba(0,0,0,0.06);
+    margin: 20px auto;
+}
+
+/* 生成按钮 — 全宽居中 */
+.greeting-generate-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    margin-top: 20px;
+    font-size: 0.55rem;
+}
+
+/* 预览区 */
+.greeting-preview {
+    text-align: center;
+}
+.greeting-canvas-wrap {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+.greeting-canvas-wrap canvas {
+    max-width: 100%;
+    height: auto;
+    /* 书本阴影——轻微的立体感 */
+    box-shadow:
+        2px 2px 10px rgba(0,0,0,0.08),
+        4px 4px 20px rgba(0,0,0,0.04);
+}
+
+/* 预览区按钮 */
+.greeting-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ===== 手机端适配 ===== */
+@media (max-width: 480px) {
+    .greeting-modal-body {
+        padding: 16px;
+    }
+    .greeting-editor .greeting-input {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+    .tibetan-input {
+        font-size: 1rem !important;
+    }
+    .chinese-input {
+        font-size: 0.85rem !important;
+    }
+    .greeting-actions {
+        flex-direction: column;
+    }
+    .greeting-actions .pixel-btn {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
 /* ==================== 17. 响应式 ==================== */
 
 /* 平板 */

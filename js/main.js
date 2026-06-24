@@ -192,6 +192,9 @@ function switchLanguage(lang) {
 
     // 重启打字机
     restartTyping();
+
+    // 刷新贺卡生成器的 UI（如果已加载）
+    if (typeof refreshGreetingUI === 'function') refreshGreetingUI();
 }
 
 langToggle.addEventListener('click', function() {
