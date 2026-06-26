@@ -12,3 +12,10 @@ desktop.ini
 # 临时文件
 *.tmp
 *.log
+
+# 留言板数据（含管理员密码哈希和访客留言）
+data.json
+
+# Python
+*.pyc
+__pycache__/

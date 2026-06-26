@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言管理 — 旦增塔杰</title>
+
+    <!-- 字体：和主站一样 -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================================
+           配色 & 字体 — 和主站一样
+           ============================================================ */
+        :root {
+            --navy: #1a1a2e;
+            --cream: #fdfaf3;
+            --red: #9b1b1b;
+            --gold: #d4a843;
+            --blue: #1e3d59;
+            --border: rgba(212, 168, 67, 0.15);
+            --font-pixel: 'Press Start 2P', monospace;
+            --font-body: 'Noto Sans SC', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--navy);
+            color: var(--cream);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ============================================================
+           卡片容器
+           ============================================================ */
+        .admin-card {
+            background: rgba(26, 26, 46, 0.9);
+            border: 2px solid var(--border);
+            box-shadow: 4px 4px 0px rgba(26, 26, 46, 0.5);
+            padding: 40px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        h1 {
+            font-family: var(--font-pixel);
+            font-size: 0.7rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-family: var(--font-pixel);
+            font-size: 0.35rem;
+            color: rgba(253, 250, 243, 0.35);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        /* ============================================================
+           登录表单
+           ============================================================ */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .login-form input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(212, 168, 67, 0.2);
+            color: var(--cream);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            padding: 12px 16px;
+            transition: border-color 0.2s;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .login-form input::placeholder {
+            color: rgba(253, 250, 243, 0.3);
+            font-size: 0.85rem;
+        }
+
+        /* ============================================================
+           像素按钮 — 和主站的 .pixel-btn 一样
+           ============================================================ */
+        .pixel-btn {
+            font-family: var(--font-pixel);
+            font-size: 0.42rem;
+            background: var(--red);
+            color: var(--cream);
+            border: none;
+            padding: 12px 28px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px rgba(26, 26, 46, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+            letter-spacing: 2px;
+        }
+
+        .pixel-btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px rgba(26, 26, 46, 0.5);
+        }
+
+        .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px rgba(26, 26, 46, 0.3);
+        }
+
+        .pixel-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 3px 3px 0px rgba(26, 26, 46, 0.4);
+        }
+
+        /* 小号按钮（删除用） */
+        .pixel-btn-sm {
+            font-family: var(--font-pixel);
+            font-size: 0.3rem;
+            background: transparent;
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 6px 14px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px rgba(155, 27, 27, 0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .pixel-btn-sm:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px rgba(155, 27, 27, 0.3);
+        }
+
+        .pixel-btn-sm:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px rgba(155, 27, 27, 0.15);
+        }
+
+        /* ============================================================
+           错误提示
+           ============================================================ */
+        .error-text {
+            font-family: var(--font-pixel);
+            font-size: 0.35rem;
+            color: var(--red);
+            text-align: center;
+            min-height: 20px;
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+           管理面板头部
+           ============================================================ */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .admin-header h1 {
+            margin-bottom: 0;
+            text-align: left;
+        }
+
+        .msg-count {
+            font-family: var(--font-pixel);
+            font-size: 0.32rem;
+            color: rgba(253, 250, 243, 0.3);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* ============================================================
+           留言列表
+           ============================================================ */
+        .msg-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* 滚动条美化 */
+        .msg-list::-webkit-scrollbar { width: 6px; }
+        .msg-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        .msg-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+        .msg-item {
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid rgba(212, 168, 67, 0.12);
+            padding: 16px 20px;
+            box-shadow: 2px 2px 0px rgba(26, 26, 46, 0.2);
+        }
+
+        .msg-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .msg-item-name {
+            font-family: var(--font-pixel);
+            font-size: 0.42rem;
+            color: var(--gold);
+        }
+
+        .msg-item-time {
+            font-family: var(--font-pixel);
+            font-size: 0.32rem;
+            color: rgba(253, 250, 243, 0.3);
+        }
+
+        .msg-item-text {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--cream);
+            line-height: 1.6;
+            word-break: break-word;
+            margin-bottom: 10px;
+        }
+
+        .msg-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .msg-item-uid {
+            font-family: var(--font-pixel);
+            font-size: 0.28rem;
+            color: rgba(253, 250, 243, 0.15);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-state p {
+            font-family: var(--font-pixel);
+            font-size: 0.45rem;
+            color: rgba(253, 250, 243, 0.35);
+        }
+
+        /* ============================================================
+           响应式（小屏幕）
+           ============================================================ */
+        @media (max-width: 600px) {
+            .admin-card { padding: 24px 20px; }
+            h1 { font-size: 0.55rem; }
+            .msg-item { padding: 12px 14px; }
+            .msg-item-text { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== 登录面板 ==================== -->
+    <div id="loginPanel" class="admin-card">
+        <h1>🏔️ 留言管理</h1>
+        <p class="subtitle">旦增塔杰's Portfolio</p>
+
+        <div class="login-form">
+            <input type="password"
+                   id="adminPassword"
+                   placeholder="请输入管理员密码"
+                   autocomplete="current-password">
+            <button class="pixel-btn" id="loginBtn">🔐 登录</button>
+            <p class="error-text" id="loginError"></p>
+        </div>
+    </div>
+
+    <!-- ==================== 管理面板（默认隐藏） ==================== -->
+    <div id="messagePanel" class="admin-card" style="display:none;">
+        <div class="admin-header">
+            <h1>🏔️ 全部留言</h1>
+            <button class="pixel-btn" id="logoutBtn">🚪 退出</button>
+        </div>
+        <p class="msg-count" id="msgCount"></p>
+        <div class="msg-list" id="adminMessageList"></div>
+        <div class="empty-state" id="adminEmpty" style="display:none;">
+            <p>📭 还没有留言</p>
+        </div>
+    </div>
+
+    <!-- ==================== JS 逻辑 ==================== -->
+    <script>
+    // API 地址（和 main.js 一样）
+    // 自动适配：本地 file:// 打开 → localhost API，云端部署 → 同域名 API
+    var API_BASE = (window.location.protocol === 'file:')
+        ? 'http://localhost:8080/api'
+        : '/api';
+
+    // DOM 元素
+    var loginPanel = document.getElementById('loginPanel');
+    var messagePanel = document.getElementById('messagePanel');
+    var adminPassword = document.getElementById('adminPassword');
+    var loginBtn = document.getElementById('loginBtn');
+    var loginError = document.getElementById('loginError');
+    var logoutBtn = document.getElementById('logoutBtn');
+    var adminMessageList = document.getElementById('adminMessageList');
+    var adminEmpty = document.getElementById('adminEmpty');
+    var msgCount = document.getElementById('msgCount');
+
+    // ============================================================
+    // 获取存着的管理员 token（sessionStorage，关掉标签页就没了）
+    // ============================================================
+    function getToken() {
+        return sessionStorage.getItem('admin_token');
+    }
+
+    function saveToken(token) {
+        sessionStorage.setItem('admin_token', token);
+    }
+
+    function clearToken() {
+        sessionStorage.removeItem('admin_token');
+    }
+
+    // ============================================================
+    // 验证 token 是否还有效
+    // ============================================================
+    function checkToken() {
+        var token = getToken();
+        if (!token) return Promise.resolve(false);
+
+        return fetch(API_BASE + '/messages?admin_token=' + encodeURIComponent(token))
+            .then(function(res) { return res.ok; })
+            .catch(function() { return false; });
+    }
+
+    // ============================================================
+    // 显示/隐藏面板
+    // ============================================================
+    function showLogin() {
+        loginPanel.style.display = '';
+        messagePanel.style.display = 'none';
+        clearToken();
+    }
+
+    function showMessages() {
+        loginPanel.style.display = 'none';
+        messagePanel.style.display = '';
+        loadAllMessages();
+    }
+
+    // ============================================================
+    // 登录
+    // ============================================================
+    function login() {
+        var password = adminPassword.value.trim();
+        if (!password) {
+            loginError.textContent = '请输入密码';
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = '登录中…';
+        loginError.textContent = '';
+
+        fetch(API_BASE + '/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: password })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.ok && data.admin_token) {
+                saveToken(data.admin_token);
+                adminPassword.value = '';
+                showMessages();
+            } else {
+                loginError.textContent = data.error || '密码错误';
+            }
+        })
+        .catch(function(err) {
+            loginError.textContent = '连接失败，请确认服务器已启动';
+            console.error('[管理后台] 登录失败:', err.message);
+        })
+        .finally(function() {
+            loginBtn.disabled = false;
+            loginBtn.textContent = '🔐 登录';
+        });
+    }
+
+    // ============================================================
+    // 加载全部留言
+    // ============================================================
+    function loadAllMessages() {
+        var token = getToken();
+        if (!token) {
+            showLogin();
+            return;
+        }
+
+        fetch(API_BASE + '/messages?admin_token=' + encodeURIComponent(token))
+            .then(function(res) {
+                if (res.status === 401) {
+                    // token 过期了
+                    showLogin();
+                    loginError.textContent = '登录已过期，请重新登录';
+                    throw new Error('token expired');
+                }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            })
+            .then(function(data) {
+                if (!data.ok) return;
+                renderAdminMessages(data.messages);
+            })
+            .catch(function(err) {
+                if (err.message !== 'token expired') {
+                    console.error('[管理后台] 加载失败:', err.message);
+                }
+            });
+    }
+
+    // ============================================================
+    // 渲染留言列表（和主站 .gb-item 一样的结构）
+    // ============================================================
+    function renderAdminMessages(messages) {
+        adminMessageList.innerHTML = '';
+
+        if (!messages || messages.length === 0) {
+            adminEmpty.style.display = '';
+            msgCount.textContent = '';
+            return;
+        }
+
+        adminEmpty.style.display = 'none';
+        msgCount.textContent = '共 ' + messages.length + ' 条留言';
+
+        messages.forEach(function(msg) {
+            var timeStr = new Date(msg.created_at).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // 把 user_id 缩短显示（只显示前8位）
+            var shortUid = msg.user_id.substring(0, 8);
+
+            var item = document.createElement('div');
+            item.className = 'msg-item';
+            item.innerHTML =
+                '<div class="msg-item-header">' +
+                    '<span class="msg-item-name">' + escapeHTML(msg.name) + '</span>' +
+                    '<span class="msg-item-time">' + timeStr + '</span>' +
+                '</div>' +
+                '<div class="msg-item-text">' + escapeHTML(msg.text) + '</div>' +
+                '<div class="msg-item-footer">' +
+                    '<span class="msg-item-uid">🆔 ' + shortUid + '</span>' +
+                    '<button class="pixel-btn-sm" data-id="' + msg.id + '">🗑 删除</button>' +
+                '</div>';
+
+            // 绑定删除按钮
+            var delBtn = item.querySelector('.pixel-btn-sm');
+            delBtn.addEventListener('click', function() {
+                deleteMessage(msg.id);
+            });
+
+            adminMessageList.appendChild(item);
+        });
+    }
+
+    // ============================================================
+    // 删除留言
+    // ============================================================
+    function deleteMessage(msgId) {
+        var token = getToken();
+        if (!token) return;
+
+        // 确认一下，防止手滑
+        if (!confirm('确定要删除这条留言吗？删了就没了哦。')) return;
+
+        fetch(API_BASE + '/messages/' + encodeURIComponent(msgId) +
+              '?admin_token=' + encodeURIComponent(token), {
+            method: 'DELETE'
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.ok) {
+                loadAllMessages();  // 删完了刷新列表
+            } else {
+                alert('删除失败：' + (data.error || '未知错误'));
+            }
+        })
+        .catch(function(err) {
+            alert('删除失败，请检查服务器');
+            console.error('[管理后台] 删除失败:', err.message);
+        });
+    }
+
+    // ============================================================
+    // XSS 防护
+    // ============================================================
+    function escapeHTML(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ============================================================
+    // 事件绑定
+    // ============================================================
+    loginBtn.addEventListener('click', login);
+
+    // 回车键也能登录
+    adminPassword.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            login();
+        }
+    });
+
+    logoutBtn.addEventListener('click', function() {
+        if (confirm('确定要退出吗？')) {
+            showLogin();
+        }
+    });
+
+    // ============================================================
+    // 页面加载时 —— 检查是否已经登录过
+    // ============================================================
+    checkToken().then(function(valid) {
+        if (valid) {
+            showMessages();
+        } else {
+            showLogin();
+        }
+    });
+    </script>
+
+</body>
+</html>
