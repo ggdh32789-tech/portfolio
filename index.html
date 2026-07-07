@@ -92,7 +92,7 @@
         <section id="home" class="section hero">
             <!-- 牧区视频背景 -->
             <div class="hero-video-wrap">
-                <video class="hero-video" autoplay muted loop playsinline preload="auto"
+                <video class="hero-video" autoplay muted loop playsinline preload="none"
                        poster="images/5d2262e0e0efd9ab9b5a1125e380ee9e.jpg">
                     <source src="images/1caa81f0a7cf064fea4bc32472cf3f8c.mp4" type="video/mp4">
                 </video>
@@ -334,8 +334,8 @@
                             </div>
                         </div>
                         <div class="card-actions">
-                            <button class="pixel-btn preview-btn" data-code="code3">
-                                <span data-i18n="code.viewCode">查看代码</span> ▶
+                            <button class="pixel-btn greeting-open-btn">
+                                <span data-i18n="greeting.openEditor">生成贺卡</span> ▶
                             </button>
                             <a href="https://github.com/ggdh32789-tech/Targly-magic" target="_blank" rel="noopener" class="pixel-btn pixel-btn-outline">
                                 <span data-i18n="code.viewRepo">项目仓库</span> 🔗
@@ -381,8 +381,9 @@
                 </h2>
                 <p class="section-desc" data-i18n="guestbook.desc">说点什么吧，像素也会发光 ✨</p>
 
-                <!-- 私密留言板 — 留言发到 GitHub Issues，网页不显示留言 -->
-                <div class="gb-form-wrap">
+                <!-- 留言板 — 本地 API 存储，每人只看得到自己的留言 -->
+                <div class="gb-firebase-wrap">
+                    <!-- 留言表单 -->
                     <div class="gb-form">
                         <input type="text" id="gbName" class="gb-input" maxlength="30"
                                data-i18n-placeholder="guestbook.namePlaceholder" placeholder="你的名字">
@@ -412,7 +413,7 @@
             <span class="music-icon">🎵</span>
         </button>
         <span class="music-hint" id="musicHint">点我放歌</span>
-        <audio id="bgMusic" src="music/bgm.mp3" loop preload="auto"></audio>
+        <audio id="bgMusic" src="music/bgm.mp3" loop preload="none"></audio>
     </div>
 
     <!-- ==================== 页脚 ==================== -->
@@ -473,14 +474,80 @@
         </div>
     </div>
 
+    <!-- ==================== 藏文书本贺卡弹窗 ==================== -->
+    <div class="modal" id="greetingModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-box greeting-modal-box">
+            <div class="modal-head">
+                <h3 class="modal-title" id="greetingModalTitle">📖 书本贺卡</h3>
+                <button class="pixel-btn modal-close-btn" id="greetingModalClose">✕</button>
+            </div>
+            <div class="modal-body greeting-modal-body">
+
+                <!-- ===== 语录选择下拉框 ===== -->
+                <div class="greeting-quote-select-wrap">
+                    <select id="greetingQuoteSelect" class="greeting-quote-select">
+                        <option value="-1" data-i18n="greeting.selectQuote">— 选择宗萨钦哲仁波切语录 —</option>
+                        <!-- JS 动态生成语录选项 -->
+                    </select>
+                </div>
+
+                <!-- ===== 编辑区：四行输入 ===== -->
+                <div class="greeting-editor" id="greetingEditor">
+                    <!-- 藏文两行 -->
+                    <textarea id="greetingTib1" class="greeting-input tibetan-input"
+                              maxlength="200" rows="1"
+                              placeholder="藏文第一行…"></textarea>
+                    <textarea id="greetingTib2" class="greeting-input tibetan-input"
+                              maxlength="200" rows="1"
+                              placeholder="藏文第二行…"></textarea>
+
+                    <!-- 微妙分隔 -->
+                    <div class="greeting-sep"></div>
+
+                    <!-- 中文两行 -->
+                    <textarea id="greetingChn1" class="greeting-input chinese-input"
+                              maxlength="200" rows="1"
+                              placeholder="中文第一行…"></textarea>
+                    <textarea id="greetingChn2" class="greeting-input chinese-input"
+                              maxlength="200" rows="1"
+                              placeholder="中文第二行…"></textarea>
+                </div>
+
+                <!-- ===== 预览区（初始隐藏） ===== -->
+                <div class="greeting-preview" id="greetingPreview" style="display:none;">
+                    <div class="greeting-canvas-wrap">
+                        <canvas id="greetingCanvas" width="1200" height="1600"></canvas>
+                    </div>
+                    <div class="greeting-actions">
+                        <button class="pixel-btn" id="greetingDownload" type="button">
+                            💾 <span data-i18n="greeting.download">下载保存</span>
+                        </button>
+                        <button class="pixel-btn pixel-btn-outline" id="greetingRegenerate" type="button">
+                            ✏️ <span data-i18n="greeting.regenerate">自己写</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 生成按钮 -->
+                <button class="pixel-btn greeting-generate-btn" id="greetingGenerate" type="button">
+                    ✨ <span data-i18n="greeting.generate">生成贺卡</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== JavaScript ==================== -->
     <!-- highlight.js 代码高亮 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <!-- 翻译文件 -->
     <script src="js/i18n.js"></script>
     <!-- 背景动画 -->
     <script src="js/background.js"></script>
     <!-- 主逻辑 -->
     <script src="js/main.js"></script>
+    <!-- 藏文贺卡生成器 -->
+    <script src="js/greeting-card.js"></script>
 </body>
 </html>

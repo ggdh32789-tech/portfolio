@@ -1,0 +1,10 @@
+# Render 部署配置
+# 文档: https://render.com/docs
+
+services:
+  - type: web
+    name: dtj-portfolio
+    runtime: python
+    buildCommand: ""             # 纯标准库，不需要构建
+    startCommand: python server.py
+    autoDeploy: true             # 每次 push GitHub 自动更新

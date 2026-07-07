@@ -6,7 +6,7 @@
    3. 导航高亮 + 手机菜单
    4. 代码预览弹窗
    5. 文章阅读弹窗
-   6. 留言板（giscus + GitHub Discussions）
+   6. 留言板（本地 API 服务器 + JSON 文件存储）
    7. 音乐播放器
    8. 回到顶部
    ============================================================ */
@@ -192,6 +192,9 @@ function switchLanguage(lang) {
 
     // 重启打字机
     restartTyping();
+
+    // 刷新贺卡生成器的 UI（如果已加载）
+    if (typeof refreshGreetingUI === 'function') refreshGreetingUI();
 }
 
 langToggle.addEventListener('click', function() {
@@ -571,31 +574,123 @@ document.querySelectorAll('.read-btn').forEach(function(btn) {
 articleModalClose.addEventListener('click', closeArticleModal);
 articleModal.querySelector('.modal-backdrop').addEventListener('click', closeArticleModal);
 
-// ==================== 6. 留言板（GitHub Issues API） ====================
-// 留言作为 Issue 发到 GitHub 私密仓库，网页不显示留言列表
-// 查看留言请去：https://github.com/ggdh32789-tech/Targyal-message/issues
-var GB_TOKEN = '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';
-var GB_REPO = 'ggdh32789-tech/Targyal-message';
+// ==================== 6. 留言板（本地 API 服务器） ====================
+// 数据存在 server.py 的 data.json 里，每人一个 UUID 只能看自己的留言
+// 启动服务器：python server.py（默认端口 8080）
+// 自动适配：本地 file:// 打开 → localhost API，云端部署 → 同域名 API
+var GB_API_BASE = (window.location.protocol === 'file:')
+    ? 'http://localhost:8080/api'
+    : '/api';
 
+// ---- UUID 身份管理 ----
+// 每个浏览器生成一个唯一 ID，存在 localStorage 里，不会丢
+// 换浏览器 / 隐私窗口 = 新身份，看不到之前的留言
+function getUserId() {
+    var id = localStorage.getItem('gb_user_id');
+    if (!id) {
+        // 优先用浏览器自带的随机 UUID 生成器
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            id = crypto.randomUUID();
+        } else {
+            // 老旧浏览器的备用方案：手动造一个 UUID v4
+            id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+        localStorage.setItem('gb_user_id', id);
+    }
+    return id;
+}
+
+var gbUserId = getUserId();
+
+// ---- DOM 元素（和之前一样） ----
 var gbName = document.getElementById('gbName');
 var gbMessage = document.getElementById('gbMessage');
 var gbSubmit = document.getElementById('gbSubmit');
 var gbSent = document.getElementById('gbSent');
 var gbCharCount = document.getElementById('gbCharCount');
 
-/** 把留言作为 GitHub Issue 提交 */
+// ---- XSS 防护：把用户输入里的 HTML 标签转义掉 ----
+function escapeHTML(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+/** 渲染留言列表 */
+function renderMessages(messages) {
+    gbList.innerHTML = '';
+
+    if (!messages || messages.length === 0) {
+        gbEmpty.style.display = 'block';
+        return;
+    }
+    gbEmpty.style.display = 'none';
+
+    messages.forEach(function(msg) {
+        var timeStr = new Date(msg.created_at).toLocaleString(
+            currentLang === 'zh' ? 'zh-CN' : 'en-US',
+            { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+        );
+        var item = document.createElement('div');
+        item.className = 'gb-item';
+        item.innerHTML =
+            '<div class="gb-item-header">' +
+                '<span class="gb-item-name">' + escapeHTML(msg.name) + '</span>' +
+                '<span class="gb-item-time">' + timeStr + '</span>' +
+            '</div>' +
+            '<div class="gb-item-text">' + escapeHTML(msg.text) + '</div>';
+        gbList.appendChild(item);
+    });
+}
+
+/** 加载留言 —— 只加载当前用户的留言 */
+function loadMessages() {
+    if (!gbLoading) return;
+    gbLoading.style.display = 'block';
+    gbList.innerHTML = '';
+    gbEmpty.style.display = 'none';
+
+    // 带上自己的 user_id，服务器只返回这个 ID 的留言
+    fetch(GB_API_BASE + '/messages?user_id=' + encodeURIComponent(gbUserId))
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(data) {
+            gbLoading.style.display = 'none';
+            if (data.ok) {
+                renderMessages(data.messages);
+            } else {
+                throw new Error(data.error || '未知错误');
+            }
+        })
+        .catch(function(err) {
+            gbLoading.style.display = 'none';
+            console.error('[留言板] 加载失败:', err.message);
+            gbEmpty.style.display = 'block';
+            gbEmpty.querySelector('p').textContent =
+                (currentLang === 'zh'
+                    ? '⚠️ 留言加载失败，请确保服务器已启动（python server.py）'
+                    : '⚠️ Failed to load. Make sure the server is running (python server.py).');
+        });
+}
+
+/** 提交留言 —— 发给本地 API 服务器 */
 function submitMessage() {
     var name = gbName.value.trim();
     var text = gbMessage.value.trim();
 
-    // 检查昵称
+    // 名字不能为空
     if (!name) {
         gbName.focus();
         gbName.style.borderColor = '#9b1b1b';
         setTimeout(function() { gbName.style.borderColor = ''; }, 1500);
         return;
     }
-    // 检查留言内容
+    // 留言内容不能为空
     if (!text) {
         gbMessage.focus();
         gbMessage.style.borderColor = '#9b1b1b';
@@ -606,61 +701,64 @@ function submitMessage() {
     gbSubmit.disabled = true;
     gbSubmit.textContent = '发送中…';
 
-    // Issue 标题 = 昵称 + 时间
-    var now = new Date();
-    var title = name + ' — ' + now.toLocaleString('zh-CN', {
-        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
-
-    // 调用 GitHub API 创建 Issue
-    fetch('https://api.github.com/repos/' + GB_REPO + '/issues', {
+    // 把 user_id、名字、留言内容一起发给服务器
+    fetch(GB_API_BASE + '/messages', {
         method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + GB_TOKEN,
-            'Content-Type': 'application/json',
-            'Accept': 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            title: title,
-            body: text,
-            labels: ['留言']
+            user_id: gbUserId,
+            name: name,
+            text: text
         })
     })
     .then(function(res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        // 发送成功：清空表单，显示绿色提示
-        gbName.value = '';
-        gbMessage.value = '';
-        gbCharCount.textContent = '0';
-        document.querySelector('.gb-form').style.display = 'none';
-        gbSent.style.display = 'block';
+        return res.json();
+    })
+    .then(function(data) {
+        if (data.ok) {
+            // 发送成功，清空表单，重新加载留言列表
+            gbName.value = '';
+            gbMessage.value = '';
+            gbCharCount.textContent = '0';
+            loadMessages();
+        } else {
+            throw new Error(data.error || '未知错误');
+        }
     })
     .catch(function(err) {
-        console.error('[留言板] 发送失败:', err);
-        alert('发送失败，请检查网络后重试 😢');
+        console.error('[留言板] 提交失败:', err.message);
+        alert(currentLang === 'zh'
+            ? '⚠️ 发送失败，请确保服务器已启动（python server.py）'
+            : '⚠️ Send failed. Make sure the server is running (python server.py).');
+    })
+    .finally(function() {
+        // 不管成功失败，都要恢复按钮
         gbSubmit.disabled = false;
         gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">发送留言</span> ✉️';
     });
 }
 
-// 字符计数
+// 字符计数（和之前一样）
 gbMessage.addEventListener('input', function() {
     var len = this.value.length;
     gbCharCount.textContent = len;
     gbCharCount.style.color = len > 450 ? '#9b1b1b' : '';
 });
 
-// 提交按钮
+// 提交按钮（和之前一样）
 gbSubmit.addEventListener('click', submitMessage);
 
-// Ctrl+Enter 快捷提交
+// Ctrl+Enter 快速提交（和之前一样）
 gbMessage.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         submitMessage();
     }
 });
+
+// 页面加载时自动加载留言
+loadMessages();
 
 // ==================== 7. 背景音乐播放器 ====================
 const musicToggle = document.getElementById('musicToggle');
@@ -759,4 +857,4 @@ document.addEventListener('keydown', function(e) {
 
 console.log('🏔️ 旦增塔杰的 Portfolio — 加载完成！');
 console.log('💡 试试：切换语言 / 播放音乐 / 留言板留个言~');
-console.log('☁️ 留言存储在云端，所有人可见');
+console.log('💬 留言存在本地 data.json，启动 server.py 即可使用');
