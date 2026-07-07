@@ -571,9 +571,96 @@ document.querySelectorAll('.read-btn').forEach(function(btn) {
 articleModalClose.addEventListener('click', closeArticleModal);
 articleModal.querySelector('.modal-backdrop').addEventListener('click', closeArticleModal);
 
-// ==================== 6. 留言板 ====================
-// 由 giscus 处理（基于 GitHub Discussions），无需本地代码
-// 配置在 index.html 中的 <script data-repo="ggdh32789-tech/portfolio" ...>
+// ==================== 6. 留言板（GitHub Issues API） ====================
+// 留言作为 Issue 发到 GitHub 私密仓库，网页不显示留言列表
+// 查看留言请去：https://github.com/ggdh32789-tech/Targyal-message/issues
+var GB_TOKEN = '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';
+var GB_REPO = 'ggdh32789-tech/Targyal-message';
+
+var gbName = document.getElementById('gbName');
+var gbMessage = document.getElementById('gbMessage');
+var gbSubmit = document.getElementById('gbSubmit');
+var gbSent = document.getElementById('gbSent');
+var gbCharCount = document.getElementById('gbCharCount');
+
+/** 把留言作为 GitHub Issue 提交 */
+function submitMessage() {
+    var name = gbName.value.trim();
+    var text = gbMessage.value.trim();
+
+    // 检查昵称
+    if (!name) {
+        gbName.focus();
+        gbName.style.borderColor = '#9b1b1b';
+        setTimeout(function() { gbName.style.borderColor = ''; }, 1500);
+        return;
+    }
+    // 检查留言内容
+    if (!text) {
+        gbMessage.focus();
+        gbMessage.style.borderColor = '#9b1b1b';
+        setTimeout(function() { gbMessage.style.borderColor = ''; }, 1500);
+        return;
+    }
+
+    gbSubmit.disabled = true;
+    gbSubmit.textContent = '发送中…';
+
+    // Issue 标题 = 昵称 + 时间
+    var now = new Date();
+    var title = name + ' — ' + now.toLocaleString('zh-CN', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    // 调用 GitHub API 创建 Issue
+    fetch('https://api.github.com/repos/' + GB_REPO + '/issues', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + GB_TOKEN,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify({
+            title: title,
+            body: text,
+            labels: ['留言']
+        })
+    })
+    .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        // 发送成功：清空表单，显示绿色提示
+        gbName.value = '';
+        gbMessage.value = '';
+        gbCharCount.textContent = '0';
+        document.querySelector('.gb-form').style.display = 'none';
+        gbSent.style.display = 'block';
+    })
+    .catch(function(err) {
+        console.error('[留言板] 发送失败:', err);
+        alert('发送失败，请检查网络后重试 😢');
+        gbSubmit.disabled = false;
+        gbSubmit.innerHTML = '<span data-i18n="guestbook.submit">发送留言</span> ✉️';
+    });
+}
+
+// 字符计数
+gbMessage.addEventListener('input', function() {
+    var len = this.value.length;
+    gbCharCount.textContent = len;
+    gbCharCount.style.color = len > 450 ? '#9b1b1b' : '';
+});
+
+// 提交按钮
+gbSubmit.addEventListener('click', submitMessage);
+
+// Ctrl+Enter 快捷提交
+gbMessage.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        submitMessage();
+    }
+});
 
 // ==================== 7. 背景音乐播放器 ====================
 const musicToggle = document.getElementById('musicToggle');

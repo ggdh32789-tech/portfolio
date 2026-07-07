@@ -381,25 +381,24 @@
                 </h2>
                 <p class="section-desc" data-i18n="guestbook.desc">说点什么吧，像素也会发光 ✨</p>
 
-                <!-- giscus 留言系统 — 基于 GitHub Discussions，所有人可见 -->
-                <div class="gb-giscus-wrap">
-                    <script src="https://giscus.app/client.js"
-                        data-repo="ggdh32789-tech/portfolio"
-                        data-repo-id="R_kgDOTB89wQ"
-                        data-category="General"
-                        data-category-id="DIC_kwDOTB89wc4C_rJb"
-                        data-mapping="specific"
-                        data-term="guestbook"
-                        data-strict="0"
-                        data-reactions-enabled="1"
-                        data-emit-metadata="0"
-                        data-input-position="top"
-                        data-theme="dark"
-                        data-lang="zh-CN"
-                        data-loading="lazy"
-                        crossorigin="anonymous"
-                        async>
-                    </script>
+                <!-- 私密留言板 — 留言发到 GitHub Issues，网页不显示留言 -->
+                <div class="gb-form-wrap">
+                    <div class="gb-form">
+                        <input type="text" id="gbName" class="gb-input" maxlength="30"
+                               data-i18n-placeholder="guestbook.namePlaceholder" placeholder="你的名字">
+                        <textarea id="gbMessage" class="gb-input gb-textarea" maxlength="500" rows="3"
+                                  data-i18n-placeholder="guestbook.msgPlaceholder" placeholder="写下你想说的话…"></textarea>
+                        <div class="gb-form-bottom">
+                            <span class="gb-count"><span id="gbCharCount">0</span>/500</span>
+                            <button class="pixel-btn" id="gbSubmit">
+                                <span data-i18n="guestbook.submit">发送留言</span> ✉️
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 发送成功后显示的提示 -->
+                    <div class="gb-sent" id="gbSent" style="display:none;">
+                        <p>✨ 留言已发送！去 <a href="https://github.com/ggdh32789-tech/Targyal-message/issues" target="_blank">GitHub 仓库</a> 查看所有留言</p>
+                    </div>
                 </div>
             </div>
         </section>
